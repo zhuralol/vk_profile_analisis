@@ -40,6 +40,9 @@ def get_group_subscribers(groupid):  # возвращает список!
 
 pass
 
+def get_all_user_info(userid):
+    fullfields = ["first_name", "last_name", "is_closed", "bdate", "user_image", "about", "activities", "career", "city", "connections", "contacts", "education", "exports", "interests", "last_seen", "military", "personal", "relatives", "relation", "schools", "sex", "universities"]
+    smallfields = []
 
 # меняет цифрыXXX в списке на ссылки в вк вида vk.com/idXXX, при использовании приравняй к другому списку!
 def linkify(users):
