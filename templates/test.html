@@ -49,7 +49,8 @@
         <div class="container">
             <form method="POST" action="/send">
                 <div class="form-group">
-                    <input type="text" name="age">
+                    <!-- Тут ввод id пользователя -->
+                    <input type="text" name="user_ids">
                 </div>
                 <input class="btn btn-primary" type="submit" value="submit">
             </form>
@@ -62,8 +63,28 @@
                 <div class="col">
                     <p>Birthday = {{ bdate }}</p>
                     <p>Is profile closed = {{ is_closed }} </p>
-                    <p>Views</p>
-                    <p>Religion</p>
+<!--                     'id', 'first_name', 'last_name', 'is_closed', 'bdate',                -->
+<!--                    'photo_400', 'about', 'activities', 'career', 'city', 'connections', 'contacts', 'education', 'exports', 'interests', 'last_seen', 'military', -->
+
+                    <p>id = {{ id }}</p>
+                    <p>about = {{ about }}</p>
+                    <p>activities = {{ activities }}</p>
+                    <p>career = {{ career }}</p>
+                    <p>city = {{ city }}</p>
+                    <p>connections = {{ connections }}</p>
+                    <p>contacts = {{ contacts }}</p>
+                    <p>education = {{ education }}</p>
+                    <p>exports = {{ exports }}</p>
+                    <p>interests = {{ interests }}</p>
+                    <p>last_seen = {{ last_seen }}</p>
+                    <p>military = {{ military }}</p>
+                    <!--                    'personal', 'relatives', 'relation', 'schools', 'sex', 'universities'  -->
+                    <p>personal = {{ personal }}</p>
+                    <p>relatives = {{ relatives }}</p>
+                    <p>relation = {{ relation }}</p>
+                    <p>schools = {{ schools }}</p>
+                    <p>sex = {{ sex }}</p>
+                    <p>universities = {{ universities }}</p>
                 </div>
             </div>
             <div class="row">
