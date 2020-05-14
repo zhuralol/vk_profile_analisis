@@ -166,6 +166,13 @@ def get_friends(id):
     return friends
     pass
 
+
+def get_groups():
+    pass
+
+def get_group_activities():
+    pass
+
 def gen_graph(userid,friends):
     edges = []
     nodes = []

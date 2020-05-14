@@ -56,6 +56,11 @@ function draw() {
     },
     edges: {
       color: "lightgray"
+    },
+    physics: {
+        stabilization: {
+            iterations: 10
+        }
     }
   };
   network = new vis.Network(container, data, options);
