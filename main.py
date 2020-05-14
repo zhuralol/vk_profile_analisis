@@ -1,3 +1,4 @@
+# coding=utf-8
 import search_script
 import auth
 import sys
@@ -37,6 +38,17 @@ first_name = "First Name"
 last_name = "Last Name"
 is_closed = "Is account closed"
 
+
+# удалить дубликаты словарей в списке словарей
+def dictcleaner(keyname, lst):
+    s = set()
+    out = list()
+    for item in lst:
+        if item[keyname] not in s:
+            s.add(item[keyname])
+            out.append(item)
+    return out
+
 # test page
 @app.route('/test')
 def test():
@@ -57,8 +69,9 @@ answer_fields = ['id', 'first_name', 'last_name', 'is_closed', 'bdate', 'photo_4
 @app.route('/')
 def index():
     userdict = {}
+    graph_data = [[{ "id": 1, "shape": "circularImage", "image": "{{ userdict.photo_400 }}", "label": "none" }], []]
 #    return render_template("test.html")
-    return render_template("index2.html", userdict=userdict)
+    return render_template("index2.html", userdict=userdict, graph_data=graph_data)
 
 @app.route('/about')
 def about():
@@ -70,15 +83,18 @@ def pricing():
     userdict = {}
     return render_template("pricing.html")
 
+@app.route('/graph')
+def friend_graph():
+    return render_template("graph.html")
 
 
 # test sending
 @app.route('/send', methods=['GET', 'POST'])
 def send():
     if request.method == 'POST':
+        graph_data = [[],[]]
         # запрос userid из формы
         user_ids = request.form['user_ids']
-
         # userinfo = api.users.get(user_ids=age, fields=['bdate', 'city', 'photo_400'])
         # userinfo = api.users.get(user_ids=age, fields=['id', 'first_name', 'last_name', 'is_closed', 'bdate',
         # 'photo_400', 'about', 'activities', 'career', 'city', 'connections', 'contacts', 'education', 'exports',
@@ -96,6 +112,10 @@ def send():
         # userdict.update(userinfo2[0])
         print(userdict)
 
+        # построение графа
+        # graph_get_data(userdict['id'])
+
+
         # чиним данные из ВК, подставляя unknown там, где нет значений
         # а это и не надо, так как берем для рендера те данные, где значения есть!
         #userdict = search_script.repair_social_data(userdict, answer_fields)
@@ -103,15 +123,97 @@ def send():
         # переводим данные в человеческий вид
         nicedata = search_script.social_to_human(userdict)
 
+        # отрисовка графа
+        profile_friends = get_friends(userdict['id'])
+        graph_data = gen_graph(userdict['id'], profile_friends)
+        graph_data[1].append({"id": userdict['id'], "shape": "circularImage", "image": userdict['photo_400'], "label": userdict['first_name']+userdict['last_name']})
+
+
+        list_counter = 0
+        # for everything in profile_friends['items']:
+        #     graph_data = graph_friend_draw(profile_friends, graph_data, list_counter)
+        #     list_counter = list_counter + 1
+
+
+
+
+        # ngd = (graph_data[0],dictcleaner("id",graph_data[1]))
+        # graph_data=ngd
+
+
         # рендерим шаблон, внутри него словарь отрендерится сам
         # return render_template('index2.html', userdict=userdict)
-        return render_template('index2.html', userdict=userdict, nicedata=nicedata)
+        return render_template('index2.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data)
 
     return render_template('index2html')
 
 
+def get_friends(id):
+    friends = []
+    try:
+        friends = api.friends.get(user_id=id, order="hints", count=5000, offset=0,
+                                fields=["photo_100", "city", "education"], name_case="nom")
+        #print(friends)
+        if friends['count'] > 5000:
+            sfriends = api.friends.get(user_id=id, order="hints", count=5000, offset=5000,
+                                fields=["photo_100", "city", "education"], name_case="nom")
+            friends['items'].append(sfriends['items'])
+            friends['count'] = friends['count'] + sfriends['count']
+
+    except Exception as e:
+        print(e)
+
+    return friends
+    pass
+
+def gen_graph(userid,friends):
+    edges = []
+    nodes = []
+
+    for friend in friends['items']:
+        friend_dict = {}
+        friend_dict['id'] = friend['id']
+        friend_dict['label'] = friend['first_name'] + " " + friend['last_name']
+        friend_dict['image'] = friend['photo_100']
+        friend_dict['shape'] = "image"
+        # print(id['id'])
+        edges.append({"from":userid,"to":friend['id']})
+        nodes.append(friend_dict)
+        pass
+    return (edges,nodes)
+
+# result = gen_graph(userid,d)
+# edges = result[0]
+# edges = graph_data[0]
+# nodes = graph_data[1]
+# nodes = result[1]
+# print(edges)
+# print(nodes)
+
+
+def graph_friend_draw(profile_friends,graph_data,num):
+    friend_friends = get_friends(profile_friends['items'][num]['id'])
+    friend_data = gen_graph(profile_friends['items'][num]['id'], friend_friends)
+
+    print(friend_friends)
+    print(friend_data[0][0])
+    print(friend_data[1][0])
+    print(graph_data[1])
+    for k in friend_data[1]:
+        # print(k)
+        graph_data[1].append(k)
+    print(graph_data[1])
+    for l in friend_data[0]:
+        print(l)
+        graph_data[0].append(l)
+    print(graph_data[0])
+    return(graph_data)
+    pass
+
+
 if __name__ == '__main__':
     print("Main script is loaded")
+    #print(get_friends(12437923))
     print(api.users.get(user_ids=1))
     app.run(debug=True)
     pass
