@@ -68,10 +68,11 @@ answer_fields = ['id', 'first_name', 'last_name', 'is_closed', 'bdate', 'photo_4
 # test page
 @app.route('/')
 def index():
-    userdict = {}
-    graph_data = [[{ "id": 1, "shape": "circularImage", "image": "{{ userdict.photo_400 }}", "label": "none" }], []]
+    userdict = {"id":"none"}
+    profile_friends = []
+    graph_data = [[{ "id": 1, "shape": "circularImage", "label": "Sample" },{ "id": 2, "shape": "circularImage", "label": "graph" },{ "id": 1, "shape": "circularImage", "label": "data" }], [{ "from": 1, "to": 2 },{ "from": 3, "to": 2 }]]
 #    return render_template("test.html")
-    return render_template("index2.html", userdict=userdict, graph_data=graph_data)
+    return render_template("index2.html", userdict=userdict, graph_data=graph_data,profile_friends=profile_friends)
 
 @app.route('/about')
 def about():
