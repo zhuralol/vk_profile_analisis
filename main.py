@@ -92,8 +92,10 @@ def friend_graph():
 @app.route('/send', methods=['GET', 'POST'])
 def send():
     if request.method == 'POST':
+        profile_friends = []
         graph_data = [[],[]]
         # запрос userid из формы
+
         user_ids = request.form['user_ids']
         # userinfo = api.users.get(user_ids=age, fields=['bdate', 'city', 'photo_400'])
         # userinfo = api.users.get(user_ids=age, fields=['id', 'first_name', 'last_name', 'is_closed', 'bdate',
@@ -108,6 +110,7 @@ def send():
         # вытаскиваем словарь с данными из ответа, т.к. рассчитано на несколько userid, берем нулевой
         # TODO - поставить проверку одного id в поле
         userdict = {}
+        user_interests = []
         userdict.update(userinfo[0])
         # userdict.update(userinfo2[0])
         print(userdict)
@@ -141,9 +144,14 @@ def send():
         # graph_data=ngd
 
 
+        # анализ подписок
+        user_groups = get_groups(userdict['id'])
+        print(user_groups)
+        user_interests = get_group_activities(user_groups)
+        print(user_interests)
         # рендерим шаблон, внутри него словарь отрендерится сам
         # return render_template('index2.html', userdict=userdict)
-        return render_template('index2.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data)
+        return render_template('index2.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,user_interests=user_interests,profile_friends=profile_friends)
 
     return render_template('index2html')
 
@@ -167,10 +175,38 @@ def get_friends(id):
     pass
 
 
-def get_groups():
+def get_groups(user_id):
+    result = []
+    try:
+        result=api.groups.get(user_id=user_id,fields=["activity"],count=1000,extended=True)
+    except Exception as e:
+        print(e)
+        result=[]
+    return result
     pass
 
-def get_group_activities():
+def get_group_activities(grouplist):
+    result = {}
+    for pub in grouplist['items']:
+        #print(pub)
+        try:
+            act = pub['activity']
+        except Exception as e:
+            print("act = pub['activity'] ERROR")
+            print(e)
+        try:
+            result[act] = result[act] + 1
+
+        except Exception as e:
+            result[act] = 1
+            print(e)
+    endresult = sorted(result.items(), key=lambda x: x[1], reverse=True)
+    #print(result)
+    #print(endresult)
+    print(endresult[:15][0][0])
+    print(endresult[:15][1][0])
+    return endresult[:15]
+
     pass
 
 def gen_graph(userid,friends):
@@ -221,6 +257,6 @@ def graph_friend_draw(profile_friends,graph_data,num):
 if __name__ == '__main__':
     print("Main script is loaded")
     #print(get_friends(12437923))
-    print(api.users.get(user_ids=1))
+    #print(api.users.get(user_ids=1))
     app.run(debug=True)
     pass
