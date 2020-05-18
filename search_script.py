@@ -138,11 +138,16 @@ def social_to_human(vk_answer):
         social_answer.append("Деятельность: {}".format(vk_answer['activities']))
         pass
     if 'career' in vk_answer:
+        print(vk_answer['career'])
         for wrk in vk_answer['career']:
             if ('group_id' in wrk) and ('position' in wrk):
                 social_answer.append("Работал/работает в vk.com/club{} на должности {}".format(wrk['group_id'], wrk['position']))
-            else:
+            elif 'group_id' in wrk:
                 social_answer.append("Работал/работает в vk.com/club{}".format(wrk['group_id']))
+            elif "company" in wrk:
+                social_answer.append("Работал/работает в {}".format(wrk['company']))
+            elif ('company' in wrk) and ('position' in wrk):
+                social_answer.append("Работал/работает в {} на должности {}".format(wrk['company'], wrk['position']))
         pass
 
     if 'city' in vk_answer:
