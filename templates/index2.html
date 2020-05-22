@@ -43,11 +43,10 @@
             <h1>Анализ профиля</h1>
             <p>Введите ссылку или id пользователя<br></p>
             <form method="POST" action="/send"><div class="form-group"> <input type="text" name="user_ids"><button class="btn btn-primary" type="sumbit" style="margin-left: 10px;margin-top: -5px;">Анализировать</button></form></div></div>
-
         <div class="container">
             <div class="row" style="margin-top: 10px;">
                 <div class="col">
-                    <h1>{{ userdict.first_name }} {{ userdict.last_name }}</h1><img src={{ userdict.photo_max }} style="margin-bottom: 10px;"></div>
+                    <h1>{{ userdict.first_name or "Имя" }} {{ userdict.last_name or "Фамилия" }}</h1><img src={{ userdict.photo_max or url_for('static', filename='img/deactivated_200.png') }} style="margin-bottom: 10px;"></div>
                     <div class="col" style="margin-top: 0px;">
                         {% for item in nicedata %}
                         <p>{{ item }}</p>

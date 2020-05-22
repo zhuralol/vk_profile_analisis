@@ -104,9 +104,10 @@ def send():
     if request.method == 'POST':
         profile_friends = []
         graph_data = [[], []]
-        # запрос userid из формы
 
+        # запрос userid из формы
         user_ids = request.form['user_ids']
+
         # userinfo = api.users.get(user_ids=age, fields=['bdate', 'city', 'photo_max'])
         # userinfo = api.users.get(user_ids=age, fields=['id', 'first_name', 'last_name', 'is_closed', 'bdate',
         # 'photo_max', 'about', 'activities', 'career', 'city', 'connections', 'contacts', 'education', 'exports',
@@ -117,6 +118,7 @@ def send():
         userinfo = api.users.get(user_ids=user_ids, fields=question_fields)
         print("userinfo is:")
         print(str(userinfo))
+
         # вытаскиваем словарь с данными из ответа, т.к. рассчитано на несколько userid, берем нулевой
         # TODO - поставить проверку одного id в поле
         userdict = {}
@@ -128,10 +130,6 @@ def send():
         # построение графа
         # graph_get_data(userdict['id'])
 
-        # чиним данные из ВК, подставляя unknown там, где нет значений
-        # а это и не надо, так как берем для рендера те данные, где значения есть!
-        # userdict = search_script.repair_social_data(userdict, answer_fields)
-
         # переводим данные в человеческий вид
         nicedata = search_script.social_to_human(userdict)
 
@@ -141,7 +139,7 @@ def send():
         graph_data[1].append({"id": userdict['id'], "shape": "circularImage", "image": userdict['photo_max'],
                               "label": userdict['first_name'] + userdict['last_name']})
 
-        list_counter = 0
+        #list_counter = 0
         # for everything in profile_friends['items']:
         #     graph_data = graph_friend_draw(profile_friends, graph_data, list_counter)
         #     list_counter = list_counter + 1

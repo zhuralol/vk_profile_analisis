@@ -1,8 +1,10 @@
 import sqlite3
 
 
-def vk_request(fields):
-    answer = [{'id': 12437923, 'first_name': 'Владимир', 'last_name': 'Журавлёв','country':'Russia' 'is_closed': False, 'can_access_closed': True, 'sex': 2, 'bdate': '4.10', 'city': {'id': 1, 'title': 'Москва'}, 'photo_400': 'https://sun9-26.userapi.com/c848524/v848524775/82499/6THfWbMBfSE.jpg?ava=1', 'mobile_phone': '12345 mobile', 'home_phone': '12345 additional', 'last_seen': {'time': 1589126887, 'platform': 7}, 'career': [], 'military': [], 'university': 0, 'university_name': '', 'faculty': 0, 'faculty_name': '', 'graduation': 0, 'relation': 0, 'personal': {'political': 2, 'langs': ['Русский', 'English', 'Español'], 'religion': 'Дискордианство', 'people_main': 0, 'life_main': 0, 'smoking': 0, 'alcohol': 0}, 'interests': 'Человеческое общество', 'activities': 'Освобождение венгров', 'universities': [], 'schools': [{'id': '1231', 'country': 1, 'city': 1, 'name': 'Школа № 220'}, {'id': '3709', 'country': 1, 'city': 1, 'name': 'Школа № 155'}, {'id': '5083', 'country': 1, 'city': 1, 'name': 'Лицей № 1550', 'type': 2, 'type_str': 'Лицей'}], 'about': '', 'relatives': []}]
+def vk_request():
+    # answer = {}
+    # answer = {'id': 4129223, 'first_name': 'Алексей', 'last_name': 'Николаев', 'is_closed': False, 'can_access_closed': True, 'city': {'id': 1, 'title': 'Москва'}, 'photo_100': 'https://sun9-18.userapi.com/c854024/v854024461/ecd73/ffYDQaQKjcw.jpg?ava=1', 'online': 0, 'origin': 4532077}
+    answer = {'id': 12437923, 'first_name': 'Владимир', 'last_name': 'Журавлёв', 'country':'Russia', 'is_closed': False, 'can_access_closed': True, 'sex': 2, 'bdate': '4.10', 'city': {'id': 1, 'title': 'Москва'}, 'photo_400': 'https://sun9-26.userapi.com/c848524/v848524775/82499/6THfWbMBfSE.jpg?ava=1', 'mobile_phone': '12345 mobile', 'home_phone': '12345 additional', 'last_seen': {'time': 1589126887, 'platform': 7}, 'career': [], 'military': [], 'university': 0, 'university_name': '', 'faculty': 0, 'faculty_name': '', 'graduation': 0, 'relation': 0, 'personal': {'political': 2, 'langs': ['Русский', 'English', 'Español'], 'religion': 'Дискордианство', 'people_main': 0, 'life_main': 0, 'smoking': 0, 'alcohol': 0}, 'interests': 'Человеческое общество', 'activities': 'Освобождение венгров', 'universities': [], 'schools': [{'id': '1231', 'country': 1, 'city': 1, 'name': 'Школа № 220'}, {'id': '3709', 'country': 1, 'city': 1, 'name': 'Школа № 155'}, {'id': '5083', 'country': 1, 'city': 1, 'name': 'Лицей № 1550', 'type': 2, 'type_str': 'Лицей'}], 'about': '', 'relatives': []}
     return answer
 
 
