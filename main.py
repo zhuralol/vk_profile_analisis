@@ -137,7 +137,41 @@ def send():
         profile_friends = get_friends(userdict['id'])
         graph_data = gen_graph(userdict['id'], profile_friends)
         graph_data[1].append({"id": userdict['id'], "shape": "circularImage", "image": userdict['photo_max'],
-                              "label": userdict['first_name'] + userdict['last_name']})
+                              "label": str(userdict['first_name']) + " " + str(userdict['last_name'])})
+        print(graph_data)
+
+        print("PROFILE FRIENDS")
+        print(profile_friends)
+
+        for everything in profile_friends['items']:
+            try:
+                time.sleep(0.3)
+                t = get_friends(everything['id'])
+                print(t)
+                k = t['items']
+                for item in k:
+                    graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
+                    item['origin'] = everything['id']
+                    item.pop("track_code", None)
+                graph_data[1].append({"id": k['id'], "shape": "circularImage", "image": k['photo_max'],
+                                      "label": str(k['first_name']) + " " + str(k['last_name'])})
+
+            except Exception as e:
+                print("for everything Exception")
+                print(str(e))
+        pass
+
+        # выводим старую graphdata
+        with open(str(userdict['id'])+"_graphdata.txt", 'w', encoding='utf-8') as fp:
+            fp.write(str(graph_data))
+
+
+
+        # вводим новую
+        # with open("testgraphdata.txt", encoding='utf-8') as fp:
+        #     # lines = fp.readlines()
+        #     lines = list(fp)
+
 
         #list_counter = 0
         # for everything in profile_friends['items']:
@@ -173,9 +207,9 @@ def send():
 
         # анализ подписок
         user_groups = get_groups(userdict['id'])
-        print(user_groups)
+        # print(user_groups)
         user_interests = get_group_activities(user_groups)
-        print(user_interests)
+        # print(user_interests)
         # рендерим шаблон, внутри него словарь отрендерится сам
         # return render_template('index2.html', userdict=userdict)
         return render_template('index2.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
@@ -219,7 +253,7 @@ def get_group_activities(grouplist):
 
     try:
         for pub in grouplist['items']:
-            print(pub)
+            # print(pub)
             try:
                 act = pub['activity']
 
@@ -228,7 +262,7 @@ def get_group_activities(grouplist):
                 except Exception as e:
                     result[act] = 1
                     print(e)
-                print(result)
+                # print(result)
 
             except Exception as e:
                 print("act = pub['activity'] ERROR")
@@ -236,9 +270,9 @@ def get_group_activities(grouplist):
 
         try:
             endresult = sorted(result.items(), key=lambda x: x[1], reverse=True)
-            print(endresult[:15][0][0])
-            print(endresult[:15][1][0])
-            print(endresult[:15])
+            # print(endresult[:15][0][0])
+            # print(endresult[:15][1][0])
+            # print(endresult[:15])
             return endresult[:15]
         except Exception as e:
 
@@ -288,19 +322,19 @@ def graph_friend_draw(profile_friends, graph_data, num):
     friend_friends = get_friends(profile_friends['items'][num]['id'])
     friend_data = gen_graph(profile_friends['items'][num]['id'], friend_friends)
 
-    print(friend_friends)
-    print(friend_data[0][0])
-    print(friend_data[1][0])
-    print(graph_data[1])
+    # print(friend_friends)
+    # print(friend_data[0][0])
+    # print(friend_data[1][0])
+    # print(graph_data[1])
     for k in friend_data[1]:
         # print(k)
         graph_data[1].append(k)
-    print(graph_data[1])
+    # print(graph_data[1])
     for l in friend_data[0]:
-        print(l)
+        # print(l)
         graph_data[0].append(l)
-    print(graph_data[0])
-    return (graph_data)
+    # print(graph_data[0])
+    return graph_data
     pass
 
 

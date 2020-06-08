@@ -1,3 +1,5 @@
+<!-- todo better to replace this with cytoscape.js -->
+
 <html>
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/vis-network.min.js') }}"></script>
@@ -58,6 +60,9 @@ function draw() {
       color: "lightgray"
     },
     physics: {
+        barnesHut: {
+            avoidOverlap: 0.5
+        },
         stabilization: {
             iterations: 10
         }
