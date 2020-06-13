@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from random import randrange
 from ast import literal_eval as le
 
-USERID = 230377912
+USERID = 32953591
 
 def gen_rand_graph(G,id_counter,conn_counter):
     for i in range(0, id_counter):
@@ -20,6 +20,41 @@ def parsegraph(filename):
     pass
     kek = le(lines[0])
     return kek
+
+def clean_graph(graphdata):
+    graphedges = []
+    for link in graphdata[0]:
+        a = link["from"]
+        b = link["to"]
+        graphedges.append([a, b])
+
+    # создаем nx-граф из данных о связях
+    G = nx.from_edgelist(graphedges)
+
+    # убираем шум
+    G = nx.k_core(G, k=2)
+    edgestostay = []
+    nodestostay = []
+
+    # списки оставшихся после удаления нод и связей
+    for node in G:
+        nodestostay.append(str(node))
+
+    for edge in G:
+        edgestostay.append(str(edge))
+
+    # списки на удаление
+    edgestoremove = []
+    for edge in graphdata[0]:
+        # если есть в списке, то ничего. Иначе удалить
+        pass
+
+    nodestoremove = []
+    for node in graphdata[1]:
+        pass
+
+    return graphdata
+    pass
 
 lol = parsegraph(str(USERID)+"_graphdata.txt")
 print(lol[1][0])

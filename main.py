@@ -144,21 +144,59 @@ def send():
         print(profile_friends)
 
         for everything in profile_friends['items']:
+
             try:
                 time.sleep(0.3)
                 t = get_friends(everything['id'])
                 print(t)
                 k = t['items']
                 for item in k:
-                    graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
+                    print(item)
+
+                    addedgetolist = True
+                    for edge in graph_data[0]:
+                        if str(edge['from']) == str(everything['id']) and str(edge['to']) == str(item['id']):
+                            addedgetolist = False
+                        elif str(edge['to']) == str(everything['id']) and (edge['from']) == str(item['id']):
+                            addedgetolist = False
+
+                    if addedgetolist:graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
+
+
+                    # graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
                     item['origin'] = everything['id']
                     item.pop("track_code", None)
-                graph_data[1].append({"id": k['id'], "shape": "circularImage", "image": k['photo_max'],
-                                      "label": str(k['first_name']) + " " + str(k['last_name'])})
+                    print({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
+                           "label": str(item['first_name']) + " " + str(item['last_name'])})
+
+
+                    addnodetolist = True
+                    for user in graph_data[1]:
+                        if user['id'] == item['id']:
+                            addnodetolist = False
+                    if addnodetolist: graph_data[1].append(
+                        {"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
+                         "label": str(item['first_name']) + " " + str(item['last_name'])})
+
+                # # проверка на повтор юзера ?
+                # addtolist = True
+                # for user in graph_data[1]:
+                #     if user['id'] == item['id']:
+                #         addtolist = False
+                # if addtolist: graph_data[1].append({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
+                #                       "label": str(item['first_name']) + " " + str(item['last_name'])})
+                #
+
+                # проверка на повтор юзера ?
+
+
 
             except Exception as e:
                 print("for everything Exception")
                 print(str(e))
+
+        # удаление дубликатов не работает - unhashable type: 'dict'
+        # graph_data[1] = list(set(graph_data[1]))
         pass
 
         # выводим старую graphdata
