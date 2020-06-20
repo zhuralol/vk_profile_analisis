@@ -9,9 +9,11 @@ import vk_requests
 from datetime import datetime
 
 # flask stuff:
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, url_for, request, render_template, flash
 from flask_bootstrap import Bootstrap
-from flask import render_template
+
+# import forms
+from forms import RegistrationForm, LoginForm
 
 # database imports
 from flask_sqlalchemy import SQLAlchemy
@@ -19,6 +21,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 # creating application, database and bootstrapping it
 app = Flask(__name__)
+
+# SECRET KEY for cookies etc
+# todo RECREATE SECRET KEY
+app.config['SECRET_KEY'] = 'e0fbb59ff9d847d521761e28cc2d69f3'
+
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 
@@ -69,6 +76,7 @@ api = vk_requests.create_api(app_id=auth.APP_ID, login=auth.APP_LOGIN, password=
 # some variable to use with VK API
 USER_ID = "12708191"
 
+# todo try to delete this
 first_name = "First Name"
 last_name = "Last Name"
 is_closed = "Is account closed"
@@ -116,6 +124,20 @@ def index():
     #    return render_template("test.html")
     return render_template("index2.html", userdict=userdict, graph_data=graph_data, profile_friends=profile_friends,
                            user_interests=user_interests)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f"Account created for {form.username.data}!", "success")
+        return redirect(url_for("index"))
+    return render_template("register.html", title='Register', form=form)
+
+@app.route('/login')
+def login():
+    form = LoginForm()
+    return render_template("login.html", title='Login', form=form)
 
 
 @app.route('/about')

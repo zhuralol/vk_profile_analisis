@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html style="background-color: rgb(238,244,247);">
+
+<head>
+    {% block head %}
+    {% include 'header.html' %}
+    {% endblock %}
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="register-photo" style="background-color: rgb(238,244,247);">
+        <div class="form-container">
+            <form method="post">
+                <h2 class="text-center"><strong>Вход</strong></h2>
+                <div class="form-group"><input class="form-control" type="email" name="email" placeholder="Email"></div>
+                <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Password"></div>
+                <div class="form-group"><input class="form-control" type="password" name="password-repeat" placeholder="Password (repeat)"></div>
+                <div class="form-group">
+                    <div class="form-check"><label class="form-check-label"><input class="form-check-input" type="checkbox">Запомнить меня</label></div>
+                </div>
+                <div class="form-group"><button class="btn btn-primary btn-block" type="submit" style="background-color: rgb(0,123,255);">Войти</button></div>
+                <a href="{{ url_for('register') }}" class="already">Нет аккаунта? Зарегистрируйтесь.</a></form>
+        </div>
+    </div>
+    <script src="static/js/jquery.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

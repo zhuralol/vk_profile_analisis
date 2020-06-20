@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<html style="background-color: rgb(238,244,247);">
+<head>
+    {% block head %}
+    {% include 'header.html' %}
+    {% endblock %}
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <div class="register-photo" style="background-color: rgb(238,244,247);">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <div class="form-container">
+            <form method="POST", action="">
+                {{ form.hidden_tag() }}
+                <h2 class="text-center"><strong>Создать аккаунт</strong></h2>
+                <div class="form-group"><input class="form-control" type="username" name="username" placeholder="Username"></div>
+                <div class="form-group"><input class="form-control" type="email" name="email" placeholder="Email"></div>
+                <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Password"></div>
+                <div class="form-group"><input class="form-control" type="password" name="confirm_password" placeholder="Password (repeat)"></div>
+                <div class="form-group">
+                    <div class="form-check"><label class="form-check-label"><input class="form-check-input" type="checkbox">Согласен с пользовательским соглашением</label></div>
+                </div>
+                <div class="form-group"><button class="btn btn-primary btn-block" type="submit" style="background-color: rgb(0,123,255);">Регистрация</button></div>
+                <a href="{{ url_for('login') }}" class="already">Уже есть аккаунт? Тогда войдите в него по ссылке</a></form>
+        </div>
+    </div>
+    <script src="static/js/jquery.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

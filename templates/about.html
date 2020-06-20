@@ -2,36 +2,13 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>diploma</title>
-    <link rel="stylesheet" href="static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-    <link rel="stylesheet" href="static/css/Features-Boxed.css">
-    <link rel="stylesheet" href="static/css/header-1.css">
-    <link rel="stylesheet" href="static/css/header-2.css">
-    <link rel="stylesheet" href="static/css/header.css">
-    <link rel="stylesheet" href="static/css/Highlight-Blue.css">
-    <link rel="stylesheet" href="static/css/Navigation-Clean.css">
-    <link rel="stylesheet" href="static/css/Newsletter-Subscription-Form.css">
-    <link rel="stylesheet" href="static/css/styles.css">
-    <link rel="stylesheet" href="static/css/Testimonials.css">
+    {% block head %}
+    {% include 'header.html' %}
+    {% endblock %}
 </head>
 
 <body>
-    <div>
-        <nav class="navbar navbar-light navbar-expand-md navigation-clean">
-            <div class="container"><a class="navbar-brand" href="#">Zhuravlev Analytics</a>
-                <div class="collapse navbar-collapse" id="navcol-1">
-                    <ul class="nav navbar-nav ml-auto">
-                        <li class="nav-item" role="presentation"><a class="nav-link" href="/">Анализ профиля</a></li>
-                        <li class="nav-item" role="presentation"><a class="nav-link active" href="#">О сервисе</a></li>
-                        <li class="nav-item" role="presentation"><a class="nav-link" href="pricing">Тарифы</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </div>
+    {% include 'navbar.html' %}
     <div></div>
     <div class="features-boxed">
         <div class="container">
