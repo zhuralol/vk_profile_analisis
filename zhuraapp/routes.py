@@ -9,6 +9,7 @@ from zhuraapp.models import User, Post
 # import forms
 from zhuraapp.forms import RegistrationForm, LoginForm
 
+from flask_login import login_user, logout_user, current_user
 
 # create API to use
 # TODO - поменять scope
@@ -193,6 +194,8 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -206,14 +209,29 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
-        if form.email.data == "admin@diploma.com" and form.password.data == 'password':
-            flash("You have been logged in", "success")
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
             return redirect(url_for('index'))
         else:
             flash("Login unsuccessful", 'danger')
     return render_template("login.html", title='Login', form=form)
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
+@app.route('/account', methods=['GET', 'POST'])
+def account():
+    logout_user()
+    return render_template(url_for("account"), title='Аккаунт')
+
 
 
 @app.route('/about')

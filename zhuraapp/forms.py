@@ -5,31 +5,31 @@ from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationE
 from zhuraapp.models import User
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username',
+    username = StringField('Имя пользователя',
                            validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email',
+    email = StringField('Почта',
                         validators=[DataRequired(), Email()])
-    password = PasswordField('Password',
+    password = PasswordField('Пароль',
                              validators=[DataRequired(), Length(min=8)])
-    confirm_password = PasswordField('Confirm Password',
+    confirm_password = PasswordField('Подтвердите пароль',
                              validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user:
-            raise ValidationError('Username is occupied. Choose another.')
+            raise ValidationError('Имя занято, выберите другое')
 
     def validate_email(self, email):
         email = User.query.filter_by(email=email.data).first()
         if email:
-            raise ValidationError('Email is already used')
+            raise ValidationError('Почта уже используется')
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email',
+    email = StringField('Почта',
                         validators=[DataRequired(), Email()])
-    password = PasswordField('Password',
+    password = PasswordField('Пароль',
                              validators=[DataRequired(), Length(min=8)])
-    remember = BooleanField('Remember me')
-    submit = SubmitField('Login')
+    remember = BooleanField('Запомнить меня')
+    submit = SubmitField('Войти')
