@@ -1,8 +1,9 @@
 # coding=utf-8
 #from main.py import api
-#from main import api
+# from main import api
 from datetime import datetime
 import time
+
 
 def send_message(api, user_id, message, **kwargs):
     data_dict = {
@@ -86,13 +87,13 @@ def get_friends(id):
     return friends
     pass
 
+
 # генерирует js-список для отрисовки графа из ответа на friends.get
 def graph_gen_nodes(friends):
     items = friends['items']
     result = []
     for friend in items:
         friend_dict = {}
-        #test = {id: 1, shape: "image", image: "https://sun9-2.userapi.com/c848524/v848524775/8249b/u7czxpksecA.jpg?ava=1", label: "Vladimir Zhuravlev"}
         friend_dict['id'] = friend['id']
         friend_dict['label'] = friend['first_name'] + " " + friend['last_name']
         friend_dict['image'] = friend['photo_100']
@@ -100,14 +101,18 @@ def graph_gen_nodes(friends):
         result.append(friend_dict)
     return result
 
+
 connection_list = [1,2,]
 # так можно сразу в такой формат и записывать!
+
+
 def graph_gen_edges(connection_list):
     # edges = [{ from: 1, to: 2 }, { from: 2, to: 3 }]
     # OR
     # edges = [{ "from": 1, "to": 2 }, { "from": 2, "to": 3 }]
     result = []
     return result
+
 
 # создание словаря с человекочитаемыми описаниями из вывода вк
 def social_to_human(vk_answer):
@@ -199,7 +204,6 @@ def social_to_human(vk_answer):
             for lang in vk_answer['personal']['langs']:
                 social_answer.append("Указан язык: {}".format(lang))
 
-
     if 'relatives' in vk_answer:
         for rel in vk_answer['relatives']:
             social_answer.append("Родной {}: vk.com/id{}".format(rel['type'], rel['id']))
@@ -239,7 +243,6 @@ def social_to_human(vk_answer):
     if 'instagram' in vk_answer:
         social_answer.append("Instagram: instagram.com/{}".format(vk_answer['instagram']))
         pass
-
 
     return social_answer
 

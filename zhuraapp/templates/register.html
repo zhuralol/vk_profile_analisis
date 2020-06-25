@@ -52,6 +52,19 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
+                    {{ form.invite.label(class="form-control-label") }}
+                    {% if form.invite.errors %}
+                        {{ form.invite(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.invite.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.invite(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
                     {{ form.password.label(class="form-control-label") }}
                     {% if form.password.errors %}
                         {{ form.password(class="form-control form-control-lg is-invalid") }}
@@ -78,9 +91,6 @@
                     {% endif %}
                 </div>
             </fieldset>
-                <div class="form-group">
-                    <div class="form-check"><label class="form-check-label"><input class="form-check-input" type="checkbox">Согласен с пользовательским соглашением</label></div>
-                </div>
                 <div class="form-group"><button class="btn btn-primary btn-block" type="submit" style="background-color: rgb(0,123,255);">Регистрация</button></div>
                 <a href="{{ url_for('login') }}" class="already">Уже есть аккаунт? Тогда войдите в него по ссылке</a></form>
         </div>

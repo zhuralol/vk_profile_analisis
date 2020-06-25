@@ -1,14 +1,19 @@
 from flask_wtf import FlaskForm
 import email_validator
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, FloatField
+from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError, NumberRange
 from zhuraapp.models import User
+
 
 class RegistrationForm(FlaskForm):
     username = StringField('Имя пользователя',
                            validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Почта',
                         validators=[DataRequired(), Email()])
+
+    invite = StringField('Инвайт',
+                        validators=[DataRequired()])
+
     password = PasswordField('Пароль',
                              validators=[DataRequired(), Length(min=8)])
     confirm_password = PasswordField('Подтвердите пароль',
@@ -25,6 +30,14 @@ class RegistrationForm(FlaskForm):
         if email:
             raise ValidationError('Почта уже используется')
 
+    def validate_invite(self, invite):
+        print(invite)
+        print(invite.data)
+        if str(invite.data) == "mospolytech":
+            pass
+        else:
+            raise ValidationError('Инвайт недействителен')
+
 
 class LoginForm(FlaskForm):
     email = StringField('Почта',
@@ -33,3 +46,22 @@ class LoginForm(FlaskForm):
                              validators=[DataRequired(), Length(min=8)])
     remember = BooleanField('Запомнить меня')
     submit = SubmitField('Войти')
+
+
+class MoneyForm(FlaskForm):
+    money_value = FloatField('Пополнить на',
+                             validators=[DataRequired(), NumberRange(min=1)])
+    submit = SubmitField('Пополнить счет')
+
+class UseridForm(FlaskForm):
+    user_id = FloatField('id пользователя',
+                             validators=[DataRequired(), Length(min=1)])
+
+    # user_id.data
+    #
+    # if (str(user_id.data).startswith("https://vk.com/")):
+    #     user_id.data = str.replace('https://vk.com/', '')
+
+
+    submit = SubmitField('анализировать')
+

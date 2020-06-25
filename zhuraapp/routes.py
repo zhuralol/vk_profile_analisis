@@ -1,5 +1,5 @@
 # flask stuff:
-from flask import redirect, url_for, request, render_template, flash
+from flask import redirect, url_for, request, render_template, flash, json
 
 import time
 import vk_requests
@@ -7,7 +7,7 @@ import vk_requests
 from zhuraapp import auth, app, db, bcrypt, search_script
 from zhuraapp.models import User, Post
 # import forms
-from zhuraapp.forms import RegistrationForm, LoginForm
+from zhuraapp.forms import RegistrationForm, LoginForm, MoneyForm, UseridForm
 
 from flask_login import login_user, logout_user, current_user
 
@@ -160,11 +160,40 @@ def graph_friend_draw(profile_friends, graph_data, num):
     pass
 
 
+@app.route("/profile/<username>")
+def profile(username):
+    users = {
+        "mitsuhiko": {
+            "name": "Armin Ronacher",
+            "bio": "Creatof of the Flask framework",
+            "twitter_handle": "@mitsuhiko"
+        },
+        "gvanrossum": {
+            "name": "Guido Van Rossum",
+            "bio": "Creator of the Python programming language",
+            "twitter_handle": "@gvanrossum"
+        },
+        "elonmusk": {
+            "name": "Elon Musk",
+            "bio": "technology entrepreneur, investor, and engineer",
+            "twitter_handle": "@elonmusk"
+        }
+    }
+
+    user = None
+
+    if username in users:
+        user = users[username]
+
+    return render_template("user.html", username=username, user=user)
+
+
+
 @app.route('/test')
 def test():
     user = {'username': 'Miguel'}
     userdict = {}
-    return render_template("index2.html", userdict=userdict)
+    return render_template("index.html", userdict=userdict)
 
 
 question_fields = ['id', 'first_name', 'last_name', 'is_closed', 'bdate', 'counters', 'photo_max', 'about',
@@ -181,6 +210,7 @@ answer_fields = ['id', 'first_name', 'last_name', 'is_closed', 'bdate', 'photo_m
 # test page
 @app.route('/')
 def index():
+    form = UseridForm()
     userdict = {"id": "none"}
     profile_friends = []
     user_interests = []
@@ -188,8 +218,8 @@ def index():
         [{"id": 1, "shape": "circularImage", "label": "Sample"}, {"id": 2, "shape": "circularImage", "label": "graph"},
          {"id": 1, "shape": "circularImage", "label": "data"}], [{"from": 1, "to": 2}, {"from": 3, "to": 2}]]
     #    return render_template("test.html")
-    return render_template("index2.html", userdict=userdict, graph_data=graph_data, profile_friends=profile_friends,
-                           user_interests=user_interests)
+    return render_template("index.html", userdict=userdict, graph_data=graph_data, profile_friends=profile_friends,
+                           user_interests=user_interests, form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -229,8 +259,14 @@ def logout():
 
 @app.route('/account', methods=['GET', 'POST'])
 def account():
-    logout_user()
-    return render_template(url_for("account"), title='Аккаунт')
+    form = MoneyForm()
+    if form.validate_on_submit():
+        print(current_user)
+        current_user.money = current_user.money + form.money_value.data
+        db.session.commit()
+        flash("Счет пополнен", 'success')
+        pass
+    return render_template("account.html", title='Аккаунт', form=form)
 
 
 
@@ -254,6 +290,9 @@ def friend_graph():
 # test sending
 @app.route('/send', methods=['GET', 'POST'])
 def send():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         profile_friends = []
         graph_data = [[], []]
@@ -357,23 +396,6 @@ def send():
             fp.write(str(graph_data))
 
 
-
-        # вводим новую
-        # with open("testgraphdata.txt", encoding='utf-8') as fp:
-        #     # lines = fp.readlines()
-        #     lines = list(fp)
-
-
-        #list_counter = 0
-        # for everything in profile_friends['items']:
-        #     graph_data = graph_friend_draw(profile_friends, graph_data, list_counter)
-        #     list_counter = list_counter + 1
-
-        # ngd = (graph_data[0],dictcleaner("id",graph_data[1]))
-        # graph_data=ngd
-
-        # filter to remove some unused data - 'track_code': '\S*'
-
         # взять данные для графа
         '''
         with open(str(userdict['id'])+'graphdata.txt', 'w', encoding='utf-8') as g:
@@ -402,8 +424,8 @@ def send():
         user_interests = get_group_activities(user_groups)
         # print(user_interests)
         # рендерим шаблон, внутри него словарь отрендерится сам
-        # return render_template('index2.html', userdict=userdict)
-        return render_template('index2.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
+        # return render_template('index.html', userdict=userdict)
+        return render_template('index.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
                                user_interests=user_interests, profile_friends=profile_friends)
 
     return render_template('index2html')

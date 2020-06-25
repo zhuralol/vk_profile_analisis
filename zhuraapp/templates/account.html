@@ -10,6 +10,20 @@
 
 <body>
     {% include 'navbar.html' %}
-
+    {% include 'flashes.html' %}
+    <h1>На вашем счету {{ current_user.money }} единиц</h1>
+    <div class="form-container">
+        <form method="post">
+        {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <div class="form-group">
+                    {{ form.money_value.label(class="form-control-label") }}
+                    {{ form.money_value(class="form-control form-control-lg") }}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary btn-block", style="background-color: rgb(0,123,255);") }}
+            </div>
+    </div>
 </body>
 </html>

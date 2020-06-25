@@ -14,7 +14,36 @@
         <div class="container">
             <h1>Анализ профиля</h1>
             <p>Введите ссылку или id пользователя<br></p>
-            <form method="POST" action="/send"><div class="form-group"> <input type="text" name="user_ids"><button class="btn btn-primary" type="sumbit" style="margin-left: 10px;margin-top: -5px;">Анализировать</button></form></div></div>
+            <div class="form-container">
+            <form method="post", action="/send">
+            <div class="form-group">
+                        {{ form.user_id.label(class="form-control-label") }}
+                        {% if form.user_id.errors %}
+                            {{ form.user_id(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.user_id.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.user_id(class="form-control form-control-lg") }}
+                        {% endif %}
+                <div class="form-group">
+                {{ form.submit(class="btn btn-primary btn-block", style="margin-left: 10px;margin-top: -5px;") }}
+                </div>
+                    </div>
+            </form>
+            </div>
+            <form method="POST" action="/send">
+                <div class="form-group">
+                    <input type="text" name="user_ids">
+                        <button class="btn btn-primary" type="sumbit" style="margin-left: 10px;margin-top: -5px;">Анализировать</button>
+                    </input>
+
+                </div>
+            </form>
+        </div>
+    </div>
         <div class="container">
             <div class="row" style="margin-top: 10px;">
                 <div class="col">
@@ -62,6 +91,7 @@
     </div>
     <script src="static/js/jquery.min.js"></script>
     <script src="static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="static/js/app.js"></script>
 </body>
 
 </html>
