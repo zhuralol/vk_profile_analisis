@@ -14,6 +14,27 @@ def gen_rand_graph(G,id_counter,conn_counter):
     pass
 
 
+def clear_graph_2(G):
+    l1 = len(G)
+    n1 = G.number_of_edges()
+    G = nx.k_core(G, k=2)
+    l2 = len(G)
+    n2 = G.number_of_edges()
+    cliques = nx.find_cliques(G)
+    cliques3 = [clq for clq in cliques if len(clq) >= 3]
+    nodes = set(n for clq in cliques3 for n in clq)
+    h = G.subgraph(nodes)
+    deg = nx.degree(h)
+    nodes = [n for n in nodes if deg[n] >= 3]
+    k = h.subgraph(nodes)
+    l3 = len(k)
+    n3 = k.number_of_edges()
+    print("1 step Number of nodes " + str(l1) + " edges " + str(n1))
+    print("2 step Number of nodes " + str(l2) + " edges " + str(n2))
+    print("3 step Number of nodes " + str(l3) + " edges " + str(n3))
+    return k
+
+
 def parsegraph(filename):
     with open(filename, 'r', encoding='utf-8') as fp:
         lines = fp.read().splitlines()
@@ -68,54 +89,8 @@ for link in lol[0]:
 print(graphedges)
 
 G = nx.from_edgelist(graphedges)
-
-# G = nx.Graph()
-
-labels = []
-nx.set_node_attributes(G, labels, 'labels')
-
-for node in G:
-    for ent in lol[1]:
-        if node == ent["id"]:
-            print(node)
-            G.nodes[node]['labels'] = ent['label']
-    # print(node)
-    # print("lel")
-    # print(lol[1][1])
-    # node['labels']=lol[1][node]['label']
-    # print(lol[1])
-    # print(node["id"])
-
-# G = nx.k_core(G, k=2)
-
-#G = nx.karate_club_graph()
-#G = nx.random_powerlaw_tree(50, gamma=4, seed=None, tries=10000)
-#G = nx.k_core(G, k=2)
-
-
-cliq = list(nx.algorithms.community.k_clique_communities(G, 4))
-print(cliq)
-# todel = []
-# for c in cliq:
-#     if USERID in c:
-#         print(c)
-#     else:
-#         todel.append(c)
-#         pass
-# for d in todel:
-#     print("deleted "+str(d))
-#     G.remove_nodes_from(d)
-
-
-
-#nbrs = nx.all_neighbors(G, str(USERID))
-# color_map=[]
-# for node in G:
-#     print(node)
-#     color_map[int(node)]="red"
-
-# nx.draw(G, node_color=color_map, with_labels=True)
-nx.write_gexf(G, str(USERID)+"test.gexf")
+G = clear_graph_2(G)
 nx.draw(G, with_labels=True)
-#
+G = nx.k_core(G, k=2)
+
 plt.show()

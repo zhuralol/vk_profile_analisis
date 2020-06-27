@@ -1,13 +1,13 @@
 # flask stuff:
-from flask import redirect, url_for, request, render_template, flash, json
+from flask import redirect, url_for, request, render_template, flash, json, jsonify, session
 
 import time
 import vk_requests
 
 from zhuraapp import auth, app, db, bcrypt, search_script
-from zhuraapp.models import User, Post
+from zhuraapp.models import User
 # import forms
-from zhuraapp.forms import RegistrationForm, LoginForm, MoneyForm, UseridForm
+from zhuraapp.forms import RegistrationForm, LoginForm, MoneyForm, UseridForm, AnalisisForm
 
 from flask_login import login_user, logout_user, current_user
 
@@ -19,6 +19,7 @@ api = vk_requests.create_api(app_id=auth.APP_ID, login=auth.APP_LOGIN, password=
                              scope=['offline'])
 
 # some variable to use with VK API
+# todo - GLOBALIZE IT
 USER_ID = "12708191"
 
 # todo try to delete this
@@ -64,6 +65,7 @@ def get_groups(user_id):
     try:
         result = api.groups.get(user_id=user_id, fields=["activity"], count=1000, extended=True)
     except Exception as e:
+        print("get_groups Exception:")
         print(e)
         result = []
     return result
@@ -83,7 +85,8 @@ def get_group_activities(grouplist):
                     result[act] = result[act] + 1
                 except Exception as e:
                     result[act] = 1
-                    print(e)
+                    # print("result[act] = 1")
+                    # print(e)
                 # print(result)
 
             except Exception as e:
@@ -160,40 +163,11 @@ def graph_friend_draw(profile_friends, graph_data, num):
     pass
 
 
-@app.route("/profile/<username>")
-def profile(username):
-    users = {
-        "mitsuhiko": {
-            "name": "Armin Ronacher",
-            "bio": "Creatof of the Flask framework",
-            "twitter_handle": "@mitsuhiko"
-        },
-        "gvanrossum": {
-            "name": "Guido Van Rossum",
-            "bio": "Creator of the Python programming language",
-            "twitter_handle": "@gvanrossum"
-        },
-        "elonmusk": {
-            "name": "Elon Musk",
-            "bio": "technology entrepreneur, investor, and engineer",
-            "twitter_handle": "@elonmusk"
-        }
-    }
-
-    user = None
-
-    if username in users:
-        user = users[username]
-
-    return render_template("user.html", username=username, user=user)
-
-
-
-@app.route('/test')
-def test():
-    user = {'username': 'Miguel'}
-    userdict = {}
-    return render_template("index.html", userdict=userdict)
+# @app.route('/test')
+# def test():
+#     user = {'username': 'Miguel'}
+#     userdict = {}
+#     return render_template("index.html", userdict=userdict)
 
 
 question_fields = ['id', 'first_name', 'last_name', 'is_closed', 'bdate', 'counters', 'photo_max', 'about',
@@ -208,7 +182,7 @@ answer_fields = ['id', 'first_name', 'last_name', 'is_closed', 'bdate', 'photo_m
 
 
 # test page
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     form = UseridForm()
     userdict = {"id": "none"}
@@ -218,6 +192,11 @@ def index():
         [{"id": 1, "shape": "circularImage", "label": "Sample"}, {"id": 2, "shape": "circularImage", "label": "graph"},
          {"id": 1, "shape": "circularImage", "label": "data"}], [{"from": 1, "to": 2}, {"from": 3, "to": 2}]]
     #    return render_template("test.html")
+
+    if form.validate_on_submit():
+        form.user_id.data = str(form.user_id.data)
+        return render_template("/id/"+form.user_id.data+".html")
+
     return render_template("index.html", userdict=userdict, graph_data=graph_data, profile_friends=profile_friends,
                            user_interests=user_interests, form=form)
 
@@ -287,10 +266,75 @@ def friend_graph():
     return render_template("graph.html")
 
 
+
+@app.route("/id/<username>", methods=['GET', 'POST'])
+def profile(username):
+    form = AnalisisForm()
+    response = request.get_json()
+    print(response)
+    print(jsonify(response))
+    graph_data = [[], []]
+
+    try:
+        userinfo = api.users.get(user_ids=username, fields=question_fields)
+    except Exception as e:
+        print(e)
+        return render_template('user.html', userdict={'first_name':'Пользователь', 'last_name':'не существует'}, user_interests=[], graph_data=[[], []],
+                               profile_friends=[], form=form)
+
+    userdict = {}
+    user_interests = []
+    userdict.update(userinfo[0])
+
+    # user_groups = get_groups(userinfo[0]['id'])
+    # print(user_groups)
+    # user_interests = get_group_activities(user_groups)
+    profile_friends=[]
+    print(userdict)
+
+    return render_template('user.html', userdict=userdict, graph_data=graph_data, profile_friends=profile_friends, form=form)
+    # return render_template('user.html', userdict=userdict, user_interests=user_interests, graph_data=graph_data, profile_friends=profile_friends)
+    # return render_template("user.html", username=username, user=user)
+
+
+@app.route('/get_len', methods=['GET', 'POST'])
+def get_len():
+    print(request.form)
+    user_id = request.form['user_id']
+    user_groups = get_groups(user_id)
+    user_interests = get_group_activities(user_groups)
+    # return json.dumps({'len': len(user_id)})
+    print(user_interests)
+
+    html = ''' <ul class="list-group" style="margin-top: 10px;">
+                        {% for item in user_interests %}
+                        <li class="list-group-item"><span>{{ item[0] }} - {{ item[1] }} групп(ы)</span></li>
+                        {% endfor %}
+                    </ul>'''
+
+    return json.dumps(html)
+
+# @app.route('/get_interests', methods=['GET', 'POST'])
+# def get_interests():
+#     user_id = request.form['user_id']
+#
+#     try:
+#         userinfo = api.users.get(user_ids=user_id, fields=question_fields)
+#     except Exception as e:
+#         print(e)
+#
+#     user_groups = get_groups(userinfo[0]['id'])
+#     user_interests = []
+#     print(user_groups)
+#     user_interests = get_group_activities(user_groups)
+#     return json.dumps(user_interests)
+
+
 # test sending
 @app.route('/send', methods=['GET', 'POST'])
 def send():
-    if current_user.is_authenticated:
+    if not current_user.is_authenticated:
+        flash("Необходима авторизация", 'danger')
         return redirect(url_for('index'))
 
     if request.method == 'POST':
@@ -335,62 +379,64 @@ def send():
         print("PROFILE FRIENDS")
         print(profile_friends)
 
-        for everything in profile_friends['items']:
+        try:
+            for everything in profile_friends['items']:
 
-            try:
-                time.sleep(0.3)
-                t = get_friends(everything['id'])
-                print(t)
-                k = t['items']
-                for item in k:
-                    print(item)
+                try:
+                    time.sleep(0.3)
+                    t = get_friends(everything['id'])
+                    print(t)
+                    k = t['items']
+                    for item in k:
+                        print(item)
 
-                    addedgetolist = True
-                    for edge in graph_data[0]:
-                        if str(edge['from']) == str(everything['id']) and str(edge['to']) == str(item['id']):
-                            addedgetolist = False
-                        elif str(edge['to']) == str(everything['id']) and (edge['from']) == str(item['id']):
-                            addedgetolist = False
+                        addedgetolist = True
+                        for edge in graph_data[0]:
+                            if str(edge['from']) == str(everything['id']) and str(edge['to']) == str(item['id']):
+                                addedgetolist = False
+                            elif str(edge['to']) == str(everything['id']) and (edge['from']) == str(item['id']):
+                                addedgetolist = False
 
-                    if addedgetolist:graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
-
-
-                    # graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
-                    item['origin'] = everything['id']
-                    item.pop("track_code", None)
-                    print({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
-                           "label": str(item['first_name']) + " " + str(item['last_name'])})
+                        if addedgetolist:graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
 
 
-                    addnodetolist = True
-                    for user in graph_data[1]:
-                        if user['id'] == item['id']:
-                            addnodetolist = False
-                    if addnodetolist: graph_data[1].append(
-                        {"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
-                         "label": str(item['first_name']) + " " + str(item['last_name'])})
-
-                # # проверка на повтор юзера ?
-                # addtolist = True
-                # for user in graph_data[1]:
-                #     if user['id'] == item['id']:
-                #         addtolist = False
-                # if addtolist: graph_data[1].append({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
-                #                       "label": str(item['first_name']) + " " + str(item['last_name'])})
-                #
-
-                # проверка на повтор юзера ?
+                        # graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
+                        item['origin'] = everything['id']
+                        item.pop("track_code", None)
+                        print({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
+                               "label": str(item['first_name']) + " " + str(item['last_name'])})
 
 
+                        addnodetolist = True
+                        for user in graph_data[1]:
+                            if user['id'] == item['id']:
+                                addnodetolist = False
+                        if addnodetolist: graph_data[1].append(
+                            {"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
+                             "label": str(item['first_name']) + " " + str(item['last_name'])})
 
-            except Exception as e:
-                print("for everything Exception")
-                print(str(e))
+                    # # проверка на повтор юзера ?
+                    # addtolist = True
+                    # for user in graph_data[1]:
+                    #     if user['id'] == item['id']:
+                    #         addtolist = False
+                    # if addtolist: graph_data[1].append({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
+                    #                       "label": str(item['first_name']) + " " + str(item['last_name'])})
+                    #
 
-        # удаление дубликатов не работает - unhashable type: 'dict'
-        # graph_data[1] = list(set(graph_data[1]))
-        pass
+                    # проверка на повтор юзера ?
 
+
+
+                except Exception as e:
+                    print("for everything Exception")
+                    print(str(e))
+
+            # удаление дубликатов не работает - unhashable type: 'dict'
+            # graph_data[1] = list(set(graph_data[1]))
+            pass
+        except Exception as e:
+            print(e)
         # выводим старую graphdata
         with open(str(userdict['id'])+"_graphdata.txt", 'w', encoding='utf-8') as fp:
             fp.write(str(graph_data))
@@ -425,7 +471,19 @@ def send():
         # print(user_interests)
         # рендерим шаблон, внутри него словарь отрендерится сам
         # return render_template('index.html', userdict=userdict)
-        return render_template('index.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
+
+        return render_template('user.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
                                user_interests=user_interests, profile_friends=profile_friends)
 
-    return render_template('index2html')
+    # во избежание ошибки
+    form = UseridForm()
+    userdict = {"id": "none"}
+    profile_friends = []
+    user_interests = []
+    graph_data = [
+        [{"id": 1, "shape": "circularImage", "label": "Sample"}, {"id": 2, "shape": "circularImage", "label": "graph"},
+         {"id": 1, "shape": "circularImage", "label": "data"}], [{"from": 1, "to": 2}, {"from": 3, "to": 2}]]
+    # return redirect(url_for('user.html', form=form, userdict=userdict, profile_friends=profile_friends,
+    #                        user_interests=user_interests, graph_data=graph_data, **request.args))
+    return render_template('index.html', form=form, userdict=userdict, profile_friends=profile_friends,
+                           user_interests=user_interests, graph_data=graph_data)

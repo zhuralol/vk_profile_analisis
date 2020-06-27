@@ -1,39 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    {% block head %}
+    {% include 'header.html' %}
+    {% endblock %}
 </head>
 <body>
-{% block title %}Profile{% endblock %}
-
+{% include 'navbar.html' %}
+{% include 'flashes.html' %}
 {% block main %}
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 
-<div class="container">
-  <div class="row">
-    <div class="col">
+<script type="text/javascript" src="{{  url_for('static', filename = 'js/jquery.min.js')  }}"></script>
+<script type="text/javascript" src="{{  url_for('static', filename = 'bootstrap/js/bootstrap.min.js')  }}"></script>
+<script type="text/javascript" src="{{  url_for('static', filename = 'js/app.js')  }}"></script>
 
-      <h1>Profile</h1>
-      <hr>
+<!--<script type="text/javascript">-->
 
-      <div class="card">
-        <div class="card-body">
-          {% if user %}
-          <h5 class="card-title">{{ username }}</h5>
-          <hr>
-          <p><strong>{{ user["name"] }}</strong></p>
-          <p style="color: blue">{{ user["twitter_handle"] }}</p>
-          <p class="text-muted">{{ user["bio"] }}</p>
-          {% else %}
-          <p>User {{ username }} not found</p>
-          {% endif %}
+<!--$(document).ready(function(){-->
+
+<!--    $('#button').click(function(e) {-->
+<!--        var inputvalue = $("#input").val();-->
+<!--        window.location.replace("/id/"+inputvalue);-->
+
+<!--    });-->
+<!--});-->
+<!--</script>-->
+
+<script type="text/javascript">// <![CDATA[
+        function loading(){
+            if (document.getElementById("loader")) {
+                //Записываем ссылку на элемент в переменную obj
+                var obj = document.getElementById("loader");
+                var content = document.getElementById("content");
+                //Если css-свойство display не block, то:
+                if (obj.style.display != "block") {
+                    obj.style.display = "block"; //Показываем элемент
+                    content.style.display = "none";
+                }
+                else {
+                obj.style.display = "none"; //Скрываем элемент
+                $("#content").show();
+                }
+            }
+            //Если элемент с id-шником element_id не найден, то выводим сообщение
+<!--            else alert("Элемент с id: " + "loader" + " не найден!");-->
+<!--            $("#loading").show();-->
+<!--            $("#content").hide();-->
+            console.log("LOADING");
+        }
+        
+// ]]>
+</script>
+<!--       <input type="text" value="11" id="input">-->
+<!--       <button type="button" id="button">Click Me!</button>-->
+<div class="top-cover center-block loader" id="loader" style="align:center;" ></div>
+<div id="content">
+    <div>
+<!--        <button class="btn btn-primary" type="button"  onclick="loading();" style="margin-left: 10px;margin-top: -5px;">Анализировать</button>-->
+        <div class="container">
+            <h1>Анализ профиля</h1>
+<!--            <p>Введите ссылку или id пользователя<br></p>-->
+            <div class="form-container">
+            <form method="POST" action="/send">
+                <div class="form-group">
+                    <input type="text" name="user_ids">
+                        <button class="btn btn-primary" type="submit"  onclick="loading();" style="margin-left: 10px;margin-top: -5px;">Анализировать</button>
+                    </input>
+
+                </div>
+            </form>
         </div>
-      </div>
+    </div>
+    <div class="container">
+        <div class="row" style="margin-top: 10px;">
+            <div class="col">
+                <h1>{{ userdict.first_name or "Имя" }} {{ userdict.last_name or "Фамилия" }}</h1><img src={{ userdict.photo_max or url_for('static', filename='img/deactivated_200.png') }} style="margin-bottom: 10px;"></div>
+                <div class="col" style="margin-top: 0px;">
+                    {% for item in nicedata %}
+                    <p>{{ item }}</p>
+                    {% endfor %}
+                </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h1 style="margin-top: 10px;">Друзья</h1>
+<!--                    <button class="btn btn-primary" type="button">Анализировать</button>-->
+                <div>
+                    <h1 style="margin-top: 10px;">Граф</h1>
+                    <div style="background-color: #ffffff;max-width: auto;min-width: 200px; min-height:400px;">
+                    {% with graph_data=graph_data %}
+                        {% include 'graph_embed.html' %}
+                    {% endwith %}
+                     </div>
+                    <div>
+                        <h1 style="margin-top: 10px;">Список друзей</h1>
+                        <ul class="list-group" style="overflow: auto; max-height: 500px;">
+                            {% for item in profile_friends['items'] %}
+                            <li class="list-group-item"><img src="{{ item['photo_100'] }}" style="width: 80px;"><span>{{ item['first_name'] }} {{ item['last_name'] }}</span>
+                                <form method="POST" action="/send"><input name=user_ids type="submit" class="btn btn-primary" type="sumbit"  value="{{ item['id'] }}" ></input></form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+                 <script>
+                    function get_len() {
+                        let user_id = "{{ userdict.id or "0" }}"
+                        $.ajax({
+                            type: "POST",
+                            url: "/get_len",
+                            data: {"user_id" : user_id},
+                            dataType: 'html',
+                            type: 'POST',
+                            success: function(response) {
+                                var json = jQuery.parseJSON(response)
+                                $('#len').html(user_id);
+                                console.log(response);
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        });
+                    }
+                 </script>
+
+            <div class="col-md-6">
+                <h1 style="margin-top: 10px;">Интересы</h1>
+<!--                    <button class="btn btn-primary" type="button">Анализировать</button>-->
+                <ul class="list-group" style="margin-top: 10px;">
+                    {% if user_interests %}
+                        {% for item in user_interests %}
+                            <li class="list-group-item"><span>{{ item[0] }} - {{ item[1] }} групп(ы)</span></li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+
 
     </div>
-  </div>
-</div>
 
+    </div>
+</div>
 {% endblock %}
 </body>
 </html>

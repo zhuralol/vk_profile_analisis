@@ -8,40 +8,32 @@
 </head>
 
 <body>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#button_goto').click(function(e) {
+            var inputvalue = $("#input_goto").val();
+            window.location.replace("/id/"+inputvalue);
+        });
+    });
+    </script>
+    
     {% include 'navbar.html' %}
     {% include 'flashes.html' %}
     <div>
         <div class="container">
             <h1>Анализ профиля</h1>
             <p>Введите ссылку или id пользователя<br></p>
-            <div class="form-container">
-            <form method="post", action="/send">
-            <div class="form-group">
-                        {{ form.user_id.label(class="form-control-label") }}
-                        {% if form.user_id.errors %}
-                            {{ form.user_id(class="form-control form-control-lg is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.user_id.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ form.user_id(class="form-control form-control-lg") }}
-                        {% endif %}
+
+<!--            <form method="POST">-->
+<!--            <form method="POST" action="/send">-->
                 <div class="form-group">
-                {{ form.submit(class="btn btn-primary btn-block", style="margin-left: 10px;margin-top: -5px;") }}
-                </div>
-                    </div>
-            </form>
-            </div>
-            <form method="POST" action="/send">
-                <div class="form-group">
-                    <input type="text" name="user_ids">
-                        <button class="btn btn-primary" type="sumbit" style="margin-left: 10px;margin-top: -5px;">Анализировать</button>
+                    <input type="text" id="input_goto" name="user_ids">
+                        <button class="btn btn-primary" type="submit" id="button_goto" style="margin-left: 10px;margin-top: -5px;">Анализировать</button>
                     </input>
 
                 </div>
-            </form>
+<!--            </form>-->
         </div>
     </div>
         <div class="container">

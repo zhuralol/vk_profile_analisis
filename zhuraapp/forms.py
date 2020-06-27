@@ -54,14 +54,22 @@ class MoneyForm(FlaskForm):
     submit = SubmitField('Пополнить счет')
 
 class UseridForm(FlaskForm):
-    user_id = FloatField('id пользователя',
+    user_id = StringField('id пользователя',
                              validators=[DataRequired(), Length(min=1)])
 
     # user_id.data
     #
     # if (str(user_id.data).startswith("https://vk.com/")):
     #     user_id.data = str.replace('https://vk.com/', '')
-
-
     submit = SubmitField('анализировать')
 
+class AnalisisForm(FlaskForm):
+    user_id = StringField('id пользователя', validators=[DataRequired(), Length(min=1)])
+    interests = BooleanField('Интересы')
+    friend_list = BooleanField('Список друзей')
+    friend_graph = BooleanField('Граф друзей')
+    # user_id.data
+    #
+    # if (str(user_id.data).startswith("https://vk.com/")):
+    #     user_id.data = str.replace('https://vk.com/', '')
+    submit = SubmitField('Начать анализ')

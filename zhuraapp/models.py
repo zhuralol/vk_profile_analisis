@@ -16,26 +16,23 @@ class User(db.Model, UserMixin):
     # delete image after
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
-    posts = db.relationship('Post', backref='author', lazy=True)
-
+    analisis_results = db.relationship('AnalisisResult', backref='creator', lazy=True)
     # thing to properly print this class
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
 
 
-# creating dummy post class for saving info from queries
-# todo rename this
-
-
-class Post(db.Model):
-
+# класс для сохранения результатов анализа
+class AnalisisResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    is_friend_list = db.Column(db.Boolean, nullable=False, default=False)
+    is_friend_graph = db.Column(db.Boolean, nullable=False, default=False)
+    is_interests = db.Column(db.Boolean, nullable=False, default=False)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # thing to properly print this class
     def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}')"
+        return f"AnalysisResult('{self.id}', '{self.timestamp}', '{self.is_friend_list}', '{self.is_friend_graph}', '{self.is_interests}')"
 
