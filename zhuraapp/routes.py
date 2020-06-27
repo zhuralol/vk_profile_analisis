@@ -276,33 +276,26 @@ def friend_graph():
 
 @app.route("/id/<username>", methods=['GET', 'POST'])
 def profile(username):
-    userinfo = api.users.get(user_ids=username)
-    print(userinfo)
-    print(username)
     form = AnalisisForm()
-    response = request.get_json()
-    print(response)
-    print(jsonify(response))
-
-    graphdata_path = USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "graphdata.txt"
-    userid=''
-
-
-    try:
-        graph_main(graphdata_path=graphdata_path, userid=userid, USERDATA_PATH=USERDATA_PATH)
-        pass
-    except Exception as e:
-        print("graph_main not loaded")
-        print(e)
-
-    graph_data = [[], []]
-
     try:
         userinfo = api.users.get(user_ids=username, fields=question_fields)
     except Exception as e:
         print(e)
-        return render_template('user.html', userdict={'first_name':'Пользователь', 'last_name':'не существует'}, user_interests=[], graph_data=[[], []],
+        return render_template('user.html', userdict={'first_name':'Пользователь', 'last_name':'не существует'}, user_interests=[], graph_data=[[],[]],
                                profile_friends=[], form=form)
+
+
+    graph_data = [[],[]]
+    try:
+        graph_data = graphs.parsegraph(USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "graphdata.txt")
+        print(graph_data)
+        pass
+    except Exception as e:
+        print("graph_main not generated")
+        print(e)
+
+
+
 
     userdict = {}
     user_interests = []
@@ -314,13 +307,22 @@ def profile(username):
     profile_friends=[]
     print(userdict)
 
-    return render_template('user.html', userdict=userdict, graph_data=graph_data, profile_friends=profile_friends, form=form)
-    # return render_template('user.html', userdict=userdict, user_interests=user_interests, graph_data=graph_data, profile_friends=profile_friends)
-    # return render_template("user.html", username=username, user=user)
+    user_interests = []
+    try:
+        user_interests = graphs.parsegraph(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\user_interests.txt")
+        print(graph_data)
+        pass
+    except Exception as e:
+        print("user_interests not generated")
+        print(e)
+
+
+    return render_template('user.html', userdict=userdict, graph_data=graph_data, profile_friends=profile_friends, form=form, user_interests=user_interests)
+
 
 
 # test sending
-@app.route('/send', methods=['GET', 'POST'])
+@app.route('/send/', methods=['GET', 'POST'])
 def send():
     if not current_user.is_authenticated:
         flash("Необходима авторизация", 'danger')
@@ -360,12 +362,13 @@ def send():
 
         # переводим данные в человеческий вид
         nicedata = search_script.social_to_human(userdict)
+
         with open(USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "nicedata.txt", 'w', encoding='utf-8') as fp:
             fp.write(str(nicedata))
 
         # отрисовка графа
         profile_friends = get_friends(userdict['id'])
-        with open(USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "profile_friends.txt", 'w', encoding='utf-8') as fp:
+        with open(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\user_interests.txt", 'w', encoding='utf-8') as fp:
             fp.write(str(profile_friends))
 
         graph_data = gen_graph(userdict['id'], profile_friends)
@@ -436,15 +439,27 @@ def send():
             pass
         except Exception as e:
             print(e)
+
+
         # выводим старую graphdata
         with open(USERDATA_PATH + "/" + str(userdict['id'])+"/"+"raw_graphdata.txt", 'w', encoding='utf-8') as fp:
             fp.write(str(graph_data))
+
         graphdata_path = USERDATA_PATH + "/" + str(userdict['id']) + "/" + "raw_graphdata.txt"
         graphs.graph_main(graphdata_path=graphdata_path, userid=str(userdict['id']), USERDATA_PATH=USERDATA_PATH)
 
+        graph_data = graphs.parsegraph(USERDATA_PATH + "/" + str(userdict['id']) + "/" + "graphdata.txt")
+        # print(graph_data)
         # анализ подписок
         user_groups = get_groups(userdict['id'])
+        print("user_groups")
+        print(user_groups)
+
         user_interests = get_group_activities(user_groups)
+        print("user_interests")
+        print(user_interests)
+        with open(USERDATA_PATH + "/" + str(userdict['id'])+"/"+"user_interests.txt", 'w', encoding='utf-8') as fp:
+            fp.write(str(user_interests))
 
         return render_template('user.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
                                user_interests=user_interests, profile_friends=profile_friends)
@@ -454,10 +469,6 @@ def send():
     userdict = {"id": "none"}
     profile_friends = []
     user_interests = []
-    graph_data = [
-        [{"id": 1, "shape": "circularImage", "label": "Sample"}, {"id": 2, "shape": "circularImage", "label": "graph"},
-         {"id": 1, "shape": "circularImage", "label": "data"}], [{"from": 1, "to": 2}, {"from": 3, "to": 2}]]
-    # return redirect(url_for('user.html', form=form, userdict=userdict, profile_friends=profile_friends,
-    #                        user_interests=user_interests, graph_data=graph_data, **request.args))
+    graph_data = []
     return render_template('index.html', form=form, userdict=userdict, profile_friends=profile_friends,
                            user_interests=user_interests, graph_data=graph_data)

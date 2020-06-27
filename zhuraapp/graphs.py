@@ -84,25 +84,6 @@ def parsegraph(filename):
     kek = le(lines[0])
     return kek
 
-def savegraph(G, userid, USERDATA_PATH):
-    # [[162392062, 44766970], [162392062, 59272621], [162392062, 65101706],
-    # [{'from': 162392062, 'to': 44766970}, {'from': 162392062, 'to': 59272621}, {'from': 162392062, 'to': 65101706},
-    graphedges = []
-    graphnodes = []
-    for edges in G:
-        print("edges is")
-        print(edges[0])
-        graphedges.append(edges)
-
-    graphnodes.append(list(G.nodes(data=True)))
-
-    graph_data = [graphedges, graphnodes]
-    with open(USERDATA_PATH + "/" + str(userid) + "/" + "graphdata.txt", 'w', encoding='utf-8') as fp:
-        fp.write(str(json_graph.node_link_data(G)))
-
-
-
-
 
 def graph_main(graphdata_path, userid, USERDATA_PATH):
     lol = parsegraph(graphdata_path)
