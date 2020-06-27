@@ -2,8 +2,7 @@ import networkx as nx  # importing networkx package
 import matplotlib.pyplot as plt
 from random import randrange
 from ast import literal_eval as le
-
-USERID = 32953591
+from networkx.readwrite import json_graph;
 
 def gen_rand_graph(G,id_counter,conn_counter):
     for i in range(0, id_counter):
@@ -14,7 +13,7 @@ def gen_rand_graph(G,id_counter,conn_counter):
     pass
 
 
-def clear_graph_2(G):
+def clear_graph(G):
     l1 = len(G)
     n1 = G.number_of_edges()
     G = nx.k_core(G, k=2)
@@ -34,6 +33,49 @@ def clear_graph_2(G):
     print("3 step Number of nodes " + str(l3) + " edges " + str(n3))
     return k
 
+def savegraph2(lol, G, USERDATA_PATH, userid):
+    # lol - это данные о полном старом графе
+    # print(lol[0][0])  {'from': 603565812, 'to': 164397292}
+    # print(lol[0][1])  {'from': 603565812, 'to': 267401830}
+    # print(lol[1][0]) {'id': 164397292, 'label': 'Дмитрий Сауков', 'image': 'https://sun9-31.userapi.com/c847124/v847124901/852e/gfAUypAgESo.jpg?ava=1', 'shape': 'image'}
+    # print(lol[1][1]){'id': 267401830, 'label': 'Эмиль Абузяров', 'image': 'https://sun9-62.userapi.com/c856036/v856036833/ff3c7/ntY3V2Evnw4.jpg?ava=1', 'shape': 'image'}
+    # G - урезанный новый граф
+    oldgraph_edges = lol[0]
+    oldgraph_nodes = lol[1]
+
+    newgraph_nodes = list(G.nodes)
+    # print(newgraph_nodes)
+    # print(oldgraph_nodes)
+    nodestodelete=[]
+
+    newnodes_list = []
+    for node in oldgraph_nodes:
+        # print(node)
+        for nnode in newgraph_nodes:
+            # print(nnode)
+            if str(node['id']) == str(nnode):
+                # print(node)
+                # print(node['id'])
+                newnodes_list.append(node)
+                pass
+
+    # print(newnodes_list)
+
+    newedges_list = []
+    # print(oldgraph_nodes)
+    newgraph_edges = G.edges()
+    for edge in oldgraph_edges:
+        for nedge in newgraph_edges:
+            if str(edge['from']) == str(nedge[0]) and str(edge['to']) == str(nedge[1]):
+                newedges_list.append(edge)
+            # print(edge)
+            # print(nedge)
+        # print(edge)
+        pass
+    graph_data = [newedges_list, newnodes_list]
+
+    with open(USERDATA_PATH + "/" + str(userid) + "/" + "graphdata.txt", 'w', encoding='utf-8') as fp:
+        fp.write(str(graph_data))
 
 def parsegraph(filename):
     with open(filename, 'r', encoding='utf-8') as fp:
@@ -42,55 +84,44 @@ def parsegraph(filename):
     kek = le(lines[0])
     return kek
 
-def clean_graph(graphdata):
+def savegraph(G, userid, USERDATA_PATH):
+    # [[162392062, 44766970], [162392062, 59272621], [162392062, 65101706],
+    # [{'from': 162392062, 'to': 44766970}, {'from': 162392062, 'to': 59272621}, {'from': 162392062, 'to': 65101706},
     graphedges = []
-    for link in graphdata[0]:
+    graphnodes = []
+    for edges in G:
+        print("edges is")
+        print(edges[0])
+        graphedges.append(edges)
+
+    graphnodes.append(list(G.nodes(data=True)))
+
+    graph_data = [graphedges, graphnodes]
+    with open(USERDATA_PATH + "/" + str(userid) + "/" + "graphdata.txt", 'w', encoding='utf-8') as fp:
+        fp.write(str(json_graph.node_link_data(G)))
+
+
+
+
+
+def graph_main(graphdata_path, userid, USERDATA_PATH):
+    lol = parsegraph(graphdata_path)
+
+    print(lol[1][0])
+    graphedges = []
+    for link in lol[0]:
         a = link["from"]
         b = link["to"]
         graphedges.append([a, b])
 
-    # создаем nx-граф из данных о связях
+    print(graphedges)
+
     G = nx.from_edgelist(graphedges)
+    G = clear_graph(G)
 
-    # убираем шум
     G = nx.k_core(G, k=2)
-    edgestostay = []
-    nodestostay = []
-
-    # списки оставшихся после удаления нод и связей
-    for node in G:
-        nodestostay.append(str(node))
-
-    for edge in G:
-        edgestostay.append(str(edge))
-
-    # списки на удаление
-    edgestoremove = []
-    for edge in graphdata[0]:
-        # если есть в списке, то ничего. Иначе удалить
-        pass
-
-    nodestoremove = []
-    for node in graphdata[1]:
-        pass
-
-    return graphdata
-    pass
-
-lol = parsegraph(str(USERID)+"_graphdata.txt")
-print(lol[1][0])
-graphedges = []
-for link in lol[0]:
-    a = link["from"]
-    b = link["to"]
-    graphedges.append([a, b])
-
-
-print(graphedges)
-
-G = nx.from_edgelist(graphedges)
-G = clear_graph_2(G)
-nx.draw(G, with_labels=True)
-G = nx.k_core(G, k=2)
-
-plt.show()
+    savegraph2(lol, G, USERDATA_PATH, userid)
+    # savegraph(G, userid, USERDATA_PATH)
+    # отрисовка графа
+    # nx.draw(G, with_labels=True)
+    # plt.show()

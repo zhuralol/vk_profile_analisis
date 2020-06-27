@@ -4,12 +4,15 @@ from flask import redirect, url_for, request, render_template, flash, json, json
 import time
 import vk_requests
 
-from zhuraapp import auth, app, db, bcrypt, search_script
+from zhuraapp import auth, app, db, bcrypt, search_script, graphs
+from zhuraapp.graphs import graph_main
 from zhuraapp.models import User
 # import forms
 from zhuraapp.forms import RegistrationForm, LoginForm, MoneyForm, UseridForm, AnalisisForm
 
 from flask_login import login_user, logout_user, current_user
+
+import os
 
 # create API to use
 # TODO - поменять scope
@@ -17,15 +20,28 @@ from flask_login import login_user, logout_user, current_user
 api = vk_requests.create_api(app_id=auth.APP_ID, login=auth.APP_LOGIN, password=auth.APP_PASSWORD,
                              phone_number=auth.APP_LOGIN,
                              scope=['offline'])
+# get current path
+PROJECT_PATH = str(os.getcwd())
+USERDATA_PATH = str(PROJECT_PATH + "\\zhuraapp\\userdata\\")
 
 # some variable to use with VK API
 # todo - GLOBALIZE IT
-USER_ID = "12708191"
+# USER_ID = "12708191"
 
 # todo try to delete this
 first_name = "First Name"
 last_name = "Last Name"
 is_closed = "Is account closed"
+
+
+def mkuserdir(user_id):
+    path = USERDATA_PATH + str(user_id)
+    try:
+        os.makedirs(path)
+    except OSError:
+        print("Creation of the directory %s failed" % path)
+    else:
+        print("Successfully created the directory %s " % path)
 
 
 # удалить дубликаты словарей в списке словарей
@@ -132,15 +148,6 @@ def gen_graph(userid, friends):
         print(str(e))
 
     return (edges, nodes)
-
-
-# result = gen_graph(userid,d)
-# edges = result[0]
-# edges = graph_data[0]
-# nodes = graph_data[1]
-# nodes = result[1]
-# print(edges)
-# print(nodes)
 
 
 def graph_friend_draw(profile_friends, graph_data, num):
@@ -269,10 +276,25 @@ def friend_graph():
 
 @app.route("/id/<username>", methods=['GET', 'POST'])
 def profile(username):
+    userinfo = api.users.get(user_ids=username)
+    print(userinfo)
+    print(username)
     form = AnalisisForm()
     response = request.get_json()
     print(response)
     print(jsonify(response))
+
+    graphdata_path = USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "graphdata.txt"
+    userid=''
+
+
+    try:
+        graph_main(graphdata_path=graphdata_path, userid=userid, USERDATA_PATH=USERDATA_PATH)
+        pass
+    except Exception as e:
+        print("graph_main not loaded")
+        print(e)
+
     graph_data = [[], []]
 
     try:
@@ -297,39 +319,6 @@ def profile(username):
     # return render_template("user.html", username=username, user=user)
 
 
-@app.route('/get_len', methods=['GET', 'POST'])
-def get_len():
-    print(request.form)
-    user_id = request.form['user_id']
-    user_groups = get_groups(user_id)
-    user_interests = get_group_activities(user_groups)
-    # return json.dumps({'len': len(user_id)})
-    print(user_interests)
-
-    html = ''' <ul class="list-group" style="margin-top: 10px;">
-                        {% for item in user_interests %}
-                        <li class="list-group-item"><span>{{ item[0] }} - {{ item[1] }} групп(ы)</span></li>
-                        {% endfor %}
-                    </ul>'''
-
-    return json.dumps(html)
-
-# @app.route('/get_interests', methods=['GET', 'POST'])
-# def get_interests():
-#     user_id = request.form['user_id']
-#
-#     try:
-#         userinfo = api.users.get(user_ids=user_id, fields=question_fields)
-#     except Exception as e:
-#         print(e)
-#
-#     user_groups = get_groups(userinfo[0]['id'])
-#     user_interests = []
-#     print(user_groups)
-#     user_interests = get_group_activities(user_groups)
-#     return json.dumps(user_interests)
-
-
 # test sending
 @app.route('/send', methods=['GET', 'POST'])
 def send():
@@ -338,16 +327,12 @@ def send():
         return redirect(url_for('index'))
 
     if request.method == 'POST':
+
         profile_friends = []
         graph_data = [[], []]
 
         # запрос userid из формы
         user_ids = request.form['user_ids']
-
-        # userinfo = api.users.get(user_ids=age, fields=['bdate', 'city', 'photo_max'])
-        # userinfo = api.users.get(user_ids=age, fields=['id', 'first_name', 'last_name', 'is_closed', 'bdate',
-        # 'photo_max', 'about', 'activities', 'career', 'city', 'connections', 'contacts', 'education', 'exports',
-        # 'interests', 'last_seen', 'military', 'personal', 'relatives', 'relation', 'schools', 'sex', 'universities'])
 
         # запрос к VK API
         # TODO - определить версию API
@@ -355,10 +340,17 @@ def send():
         print("userinfo is:")
         print(str(userinfo))
 
+
+
         # вытаскиваем словарь с данными из ответа, т.к. рассчитано на несколько userid, берем нулевой
         # TODO - поставить проверку одного id в поле
         userdict = {}
         user_interests = []
+
+        # пытаемся создать папку для результатов
+        mkuserdir(str(userinfo[0]['id']))
+
+
         userdict.update(userinfo[0])
         # userdict.update(userinfo2[0])
         print(userdict)
@@ -368,27 +360,34 @@ def send():
 
         # переводим данные в человеческий вид
         nicedata = search_script.social_to_human(userdict)
+        with open(USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "nicedata.txt", 'w', encoding='utf-8') as fp:
+            fp.write(str(nicedata))
 
         # отрисовка графа
         profile_friends = get_friends(userdict['id'])
+        with open(USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "profile_friends.txt", 'w', encoding='utf-8') as fp:
+            fp.write(str(profile_friends))
+
         graph_data = gen_graph(userdict['id'], profile_friends)
         graph_data[1].append({"id": userdict['id'], "shape": "circularImage", "image": userdict['photo_max'],
                               "label": str(userdict['first_name']) + " " + str(userdict['last_name'])})
-        print(graph_data)
+        # print(graph_data)
 
         print("PROFILE FRIENDS")
-        print(profile_friends)
+        # print(profile_friends)
 
         try:
+            friendcount = 0
             for everything in profile_friends['items']:
-
+                friendcount = friendcount + 1
+                print("friendcount is "+str(friendcount))
                 try:
                     time.sleep(0.3)
                     t = get_friends(everything['id'])
-                    print(t)
+                    # print(t)
                     k = t['items']
                     for item in k:
-                        print(item)
+                        # print(item)
 
                         addedgetolist = True
                         for edge in graph_data[0]:
@@ -403,8 +402,8 @@ def send():
                         # graph_data[0].append({'from': str(everything['id']), 'to': str(item['id'])})
                         item['origin'] = everything['id']
                         item.pop("track_code", None)
-                        print({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
-                               "label": str(item['first_name']) + " " + str(item['last_name'])})
+                        # print({"id": item['id'], "shape": "circularImage", "image": item['photo_100'],
+                        #        "label": str(item['first_name']) + " " + str(item['last_name'])})
 
 
                         addnodetolist = True
@@ -438,39 +437,14 @@ def send():
         except Exception as e:
             print(e)
         # выводим старую graphdata
-        with open(str(userdict['id'])+"_graphdata.txt", 'w', encoding='utf-8') as fp:
+        with open(USERDATA_PATH + "/" + str(userdict['id'])+"/"+"raw_graphdata.txt", 'w', encoding='utf-8') as fp:
             fp.write(str(graph_data))
-
-
-        # взять данные для графа
-        '''
-        with open(str(userdict['id'])+'graphdata.txt', 'w', encoding='utf-8') as g:
-            g.write(str(profile_friends['items']))
-
-
-            for everything in profile_friends['items']:
-                try:
-                    time.sleep(0.3)
-                    t = get_friends(everything['id'])
-                    print(t)
-                    k = t['items']
-                    for item in k:
-                        item['origin'] = everything['id']
-                        item.pop("track_code", None)
-                    g.write(str(k))
-                except Exception as e:
-                    print(str(e))
-            pass
-        pass
-        '''
+        graphdata_path = USERDATA_PATH + "/" + str(userdict['id']) + "/" + "raw_graphdata.txt"
+        graphs.graph_main(graphdata_path=graphdata_path, userid=str(userdict['id']), USERDATA_PATH=USERDATA_PATH)
 
         # анализ подписок
         user_groups = get_groups(userdict['id'])
-        # print(user_groups)
         user_interests = get_group_activities(user_groups)
-        # print(user_interests)
-        # рендерим шаблон, внутри него словарь отрендерится сам
-        # return render_template('index.html', userdict=userdict)
 
         return render_template('user.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
                                user_interests=user_interests, profile_friends=profile_friends)

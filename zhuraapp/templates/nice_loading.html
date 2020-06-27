@@ -1,0 +1,84 @@
+<!DOCTYPE html> 
+<html> 
+
+    <style> 
+        
+        center{
+            display: block; 
+            background-color: #111111;
+            position: absolute; 
+            width: 10px; 
+            height: 10px; 
+            left: calc(50% - 1em); 
+            border-radius: 1em; 
+            transform-origin: 1em 2em; 
+            animation: rotate; 
+            animation-iteration-count: infinite; 
+            animation-duration: 1.6s; 
+        } 
+   
+        @keyframes rotate { 
+              100% { transform: rotate(360deg); }
+			0% { transform: rotate(0deg); } 
+        } 
+
+        .d1 { 
+            animation-delay: 0.5s; 
+            background-color: #aaaaaa; 
+        } 
+        .d2 { 
+            animation-delay: 0.45s; 
+            background-color: #999999; 
+        } 
+        .d3 { 
+            animation-delay: 0.4s; 
+            background-color: #888888; 
+        } 
+        .d4 { 
+            animation-delay: 0.35s; 
+            background-color: #777777; 
+        } 
+        .d5 { 
+            animation-delay: 0.3s; 
+            background-color: #666666; 
+        }         
+        .d6 { 
+            animation-delay: 0.25s; 
+            background-color: #555555; 
+        } 
+        .d7 { 
+            animation-delay: 0.2s; 
+            background-color: #444444; 
+        } 
+        .d8 { 
+            animation-delay: 0.15s; 
+            background-color: #333333; 
+        } 
+        .d9 { 
+            animation-delay: 0.1s; 
+            background-color: #222222; 
+        } 
+        .d10 { 
+            animation-delay: 0.05s; 
+            background-color: #111111; 
+        } 
+    </style> 
+
+    <center id="loader">
+        <h2 class="text-center"><strong>Загрузка... Пожалуйста, не закрывайте эту страницу.</strong></h2>
+        <div class='d0'></div>
+        <div class='d1'></div>
+        <div class='d2'></div>
+        <div class='d3'></div>
+        <div class='d4'></div>
+        <div class='d5'></div>
+        <div class='d6'></div>
+        <div class='d7'></div>
+        <div class='d8'></div>
+        <div class='d9'></div>
+        <div class='d10'></div>
+    </center> 
+
+</html>
+
+ 
