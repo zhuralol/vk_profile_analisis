@@ -22,7 +22,7 @@ api = vk_requests.create_api(app_id=auth.APP_ID, login=auth.APP_LOGIN, password=
                              scope=['offline'])
 # get current path
 PROJECT_PATH = str(os.getcwd())
-USERDATA_PATH = str(PROJECT_PATH + "\\zhuraapp\\userdata\\")
+USERDATA_PATH = str(os.path.join(PROJECT_PATH,"zhuraapp", "userdata"))
 
 # some variable to use with VK API
 # todo - GLOBALIZE IT
@@ -35,7 +35,7 @@ is_closed = "Is account closed"
 
 
 def mkuserdir(user_id):
-    path = USERDATA_PATH + str(user_id)
+    path = os.path.join(USERDATA_PATH, str(user_id))
     try:
         os.makedirs(path)
     except OSError:
@@ -249,7 +249,7 @@ def account():
     analisis_results = AnalisisResult.query.filter(AnalisisResult.user_id == current_user.id).all()
     form = MoneyForm()
     if form.validate_on_submit():
-        print(current_user)
+        # print(current_user)
         current_user.money = current_user.money + form.money_value.data
         db.session.commit()
         flash("Счет пополнен", 'success')
@@ -289,8 +289,8 @@ def profile(username):
 
     graph_data = [[],[]]
     try:
-        graph_data = graphs.parsegraph(USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "graphdata.txt")
-        print(graph_data)
+        graph_data = graphs.parsegraph(os.path.join(USERDATA_PATH, str(userinfo[0]['id']) , "graphdata.txt"))
+        # print(graph_data)
         pass
     except Exception as e:
         print("graph_main not generated")
@@ -308,8 +308,8 @@ def profile(username):
     # user_interests = get_group_activities(user_groups)
     profile_friends=[]
     try:
-        profile_friends = graphs.parsegraph(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\profile_friends.txt")
-        print(profile_friends)
+        profile_friends = graphs.parsegraph(os.path.join(USERDATA_PATH, str(userinfo[0]['id']) , "profile_friends.txt"))
+        # print(profile_friends)
         pass
     except Exception as e:
         print("profile_friends not generated")
@@ -317,12 +317,12 @@ def profile(username):
 
 
 
-    print(userdict)
+    # print(userdict)
 
     user_interests = []
     try:
-        user_interests = graphs.parsegraph(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\user_interests.txt")
-        print(graph_data)
+        user_interests = graphs.parsegraph(os.path.join(USERDATA_PATH,  str(userinfo[0]['id']), "user_interests.txt"))
+        # print(graph_data)
         pass
     except Exception as e:
         print("user_interests not generated")
@@ -354,8 +354,8 @@ def send(username):
         # запрос к VK API
         # TODO - определить версию API
         userinfo = api.users.get(user_ids=username, fields=question_fields)
-        print("userinfo is:")
-        print(str(userinfo))
+        # print("userinfo is:")
+        # print(str(userinfo))
 
         if current_user.money >= 100:
             current_user.money = current_user.money - 100
@@ -380,7 +380,7 @@ def send(username):
 
         userdict.update(userinfo[0])
         # userdict.update(userinfo2[0])
-        print(userdict)
+        # print(userdict)
 
         # построение графа
         # graph_get_data(userdict['id'])
@@ -388,12 +388,12 @@ def send(username):
         # переводим данные в человеческий вид
         nicedata = search_script.social_to_human(userdict)
 
-        with open(USERDATA_PATH + "/" + str(userinfo[0]['id']) + "/" + "nicedata.txt", 'w', encoding='utf-8') as fp:
+        with open(os.path.join(USERDATA_PATH, str(userinfo[0]['id']) , "nicedata.txt"), 'w', encoding='utf-8') as fp:
             fp.write(str(nicedata))
 
         # отрисовка графа
         profile_friends = get_friends(userdict['id'])
-        with open(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\profile_friends.txt", 'w', encoding='utf-8') as fp:
+        with open(os.path.join(USERDATA_PATH, str(userinfo[0]['id']) , "profile_friends.txt"), 'w', encoding='utf-8') as fp:
             fp.write(str(profile_friends))
 
         graph_data = gen_graph(userdict['id'], profile_friends)
@@ -401,14 +401,14 @@ def send(username):
                               "label": str(userdict['first_name']) + " " + str(userdict['last_name'])})
         # print(graph_data)
 
-        print("PROFILE FRIENDS")
+        # print("PROFILE FRIENDS")
         # print(profile_friends)
 
         try:
             friendcount = 0
             for everything in profile_friends['items']:
                 friendcount = friendcount + 1
-                print("friendcount is "+str(friendcount))
+                # print("friendcount is "+str(friendcount))
                 try:
                     time.sleep(0.3)
                     t = get_friends(everything['id'])
@@ -467,23 +467,23 @@ def send(username):
 
 
         # выводим старую graphdata
-        with open(USERDATA_PATH + "/" + str(userdict['id'])+"/"+"raw_graphdata.txt", 'w', encoding='utf-8') as fp:
+        with open(os.path.join(USERDATA_PATH, str(userdict['id']), "raw_graphdata.txt"), 'w', encoding='utf-8') as fp:
             fp.write(str(graph_data))
 
-        graphdata_path = USERDATA_PATH + "/" + str(userdict['id']) + "/" + "raw_graphdata.txt"
+        graphdata_path = os.path.join(USERDATA_PATH, str(userdict['id']), "raw_graphdata.txt")
         graphs.graph_main(graphdata_path=graphdata_path, userid=str(userdict['id']), USERDATA_PATH=USERDATA_PATH)
 
-        graph_data = graphs.parsegraph(USERDATA_PATH + "/" + str(userdict['id']) + "/" + "graphdata.txt")
+        # graph_data = graphs.parsegraph(USERDATA_PATH + "/" + str(userdict['id']) + "/" + "graphdata.txt")
         # print(graph_data)
         # анализ подписок
         user_groups = get_groups(userdict['id'])
-        print("user_groups")
-        print(user_groups)
+        # print("user_groups")
+        # print(user_groups)
 
         user_interests = get_group_activities(user_groups)
-        print("user_interests")
-        print(user_interests)
-        with open(USERDATA_PATH + "/" + str(userdict['id'])+"/"+"user_interests.txt", 'w', encoding='utf-8') as fp:
+        # print("user_interests")
+        # print(user_interests)
+        with open(os.path.join(USERDATA_PATH, str(userdict['id']), "user_interests.txt"), 'w', encoding='utf-8') as fp:
             fp.write(str(user_interests))
 
         return redirect('/id/'+str(userdict['id']))

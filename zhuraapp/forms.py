@@ -61,7 +61,7 @@ class UseridForm(FlaskForm):
     #
     # if (str(user_id.data).startswith("https://vk.com/")):
     #     user_id.data = str.replace('https://vk.com/', '')
-    submit = SubmitField('анализировать')
+    submit = SubmitField('Перейти к пользователю')
 
 class AnalisisForm(FlaskForm):
     user_id = StringField('id пользователя', validators=[DataRequired(), Length(min=1)])
