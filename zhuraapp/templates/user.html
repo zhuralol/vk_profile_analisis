@@ -63,14 +63,21 @@
             <h1>Анализ профиля</h1>
 <!--            <p>Введите ссылку или id пользователя<br></p>-->
             <div class="form-container">
-            <form method="POST" action="/send">
-                <div class="form-group">
-                    <input type="text" name="user_ids">
-                        <button class="btn btn-primary" type="submit"  onclick="loading();" style="margin-left: 10px;margin-top: -5px;">Анализировать</button>
-                    </input>
-
-                </div>
-            </form>
+                {% if userdict.id %}
+                <form method="POST" action="/send/{{ userdict.id }}">
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit"  onclick="loading();" style="margin-left: 10px;margin-top: -5px;">Перенализировать</button>
+                    </div>
+                </form>
+                {% else %}
+                <form method="POST" action="/send/{{ userdict.id }}">
+<!--                    <div class="form-group">-->
+<!--                        <input type="text" name="user_ids">-->
+<!--                            <button class="btn btn-primary" type="submit"  onclick="loading();" style="margin-left: 10px;margin-top: -5px;">Анализировать</button>-->
+<!--                        </input>-->
+<!--                    </div>-->
+                </form>
+                {% endif %}
         </div>
     </div>
     <div class="container">

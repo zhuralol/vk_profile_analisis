@@ -26,13 +26,12 @@ class User(db.Model, UserMixin):
 class AnalisisResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    is_friend_list = db.Column(db.Boolean, nullable=False, default=False)
-    is_friend_graph = db.Column(db.Boolean, nullable=False, default=False)
-    is_interests = db.Column(db.Boolean, nullable=False, default=False)
-
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    vk_id = db.Column(db.String(120), nullable=False)
+    vk_name = db.Column(db.String(120), nullable=False)
+    vk_photo = db.Column(db.String(200), nullable=False, default='img/deactivated_200.png')
 
     # thing to properly print this class
     def __repr__(self):
-        return f"AnalysisResult('{self.id}', '{self.timestamp}', '{self.is_friend_list}', '{self.is_friend_graph}', '{self.is_interests}')"
+        return f"AnalysisResult('{self.id}', '{self.timestamp}', '{self.user_id}', '{self.vk_id}', '{self.vk_name}')"
 

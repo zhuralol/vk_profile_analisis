@@ -12,6 +12,7 @@
     {% include 'navbar.html' %}
     {% include 'flashes.html' %}
     <h1>На вашем счету {{ current_user.money }} единиц</h1>
+    <div class="register-photo">
     <div class="form-container">
         <form method="post">
         {{ form.hidden_tag() }}
@@ -23,6 +24,23 @@
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-primary btn-block", style="background-color: rgb(0,123,255);") }}
+            </div>
+            </form>
+    </div>
+    
+    <h1>Проанализированные аккаунты:</h1>
+        <div class=".container">
+    {% for user in analisis_results %}
+        <article class="media content-section">
+          <img class="rounded-circle article-img" src="{{ user.vk_photo }}" style="max-width: 100px;">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-3" href="/id/{{ user.vk_id }}">{{ user.vk_name }}</a>
+              <small class="text-muted">{{ user.timestamp.strftime('%Y-%m-%d') }}</small>
+            </div>
+          </div>
+        </article>
+    {% endfor %}
             </div>
     </div>
 </body>

@@ -6,11 +6,11 @@ import vk_requests
 
 from zhuraapp import auth, app, db, bcrypt, search_script, graphs
 from zhuraapp.graphs import graph_main
-from zhuraapp.models import User
+from zhuraapp.models import User, AnalisisResult
 # import forms
 from zhuraapp.forms import RegistrationForm, LoginForm, MoneyForm, UseridForm, AnalisisForm
 
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_user, logout_user, current_user, login_required
 
 import os
 
@@ -244,7 +244,9 @@ def logout():
 
 
 @app.route('/account', methods=['GET', 'POST'])
+@login_required
 def account():
+    analisis_results = AnalisisResult.query.filter(AnalisisResult.user_id == current_user.id).all()
     form = MoneyForm()
     if form.validate_on_submit():
         print(current_user)
@@ -252,7 +254,7 @@ def account():
         db.session.commit()
         flash("Счет пополнен", 'success')
         pass
-    return render_template("account.html", title='Аккаунт', form=form)
+    return render_template("account.html", title='Аккаунт', form=form, analisis_results=analisis_results)
 
 
 
@@ -305,6 +307,16 @@ def profile(username):
     # print(user_groups)
     # user_interests = get_group_activities(user_groups)
     profile_friends=[]
+    try:
+        profile_friends = graphs.parsegraph(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\profile_friends.txt")
+        print(profile_friends)
+        pass
+    except Exception as e:
+        print("profile_friends not generated")
+        print(e)
+
+
+
     print(userdict)
 
     user_interests = []
@@ -322,27 +334,40 @@ def profile(username):
 
 
 # test sending
-@app.route('/send/', methods=['GET', 'POST'])
-def send():
+@app.route('/send/<username>', methods=['GET', 'POST'])
+def send(username):
     if not current_user.is_authenticated:
         flash("Необходима авторизация", 'danger')
         return redirect(url_for('index'))
 
     if request.method == 'POST':
 
+
+
+
         profile_friends = []
         graph_data = [[], []]
 
         # запрос userid из формы
-        user_ids = request.form['user_ids']
+        # user_ids = request.form['user_ids']
 
         # запрос к VK API
         # TODO - определить версию API
-        userinfo = api.users.get(user_ids=user_ids, fields=question_fields)
+        userinfo = api.users.get(user_ids=username, fields=question_fields)
         print("userinfo is:")
         print(str(userinfo))
 
-
+        if current_user.money >= 100:
+            current_user.money = current_user.money - 100
+            res = AnalisisResult(user_id=current_user.id, vk_id=str(userinfo[0]['id']),
+                                 vk_name=str(userinfo[0]['first_name'])+' '+str(userinfo[0]['last_name']),
+                                 vk_photo=userinfo[0]['photo_max'])
+            db.session.add(res)
+            db.session.commit()
+            flash("Оплата успешна", 'success')
+        else:
+            flash("Пополните счет", 'failure')
+            return redirect(url_for('index'))
 
         # вытаскиваем словарь с данными из ответа, т.к. рассчитано на несколько userid, берем нулевой
         # TODO - поставить проверку одного id в поле
@@ -368,7 +393,7 @@ def send():
 
         # отрисовка графа
         profile_friends = get_friends(userdict['id'])
-        with open(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\user_interests.txt", 'w', encoding='utf-8') as fp:
+        with open(str(USERDATA_PATH) + str(userinfo[0]['id']) + "\\profile_friends.txt", 'w', encoding='utf-8') as fp:
             fp.write(str(profile_friends))
 
         graph_data = gen_graph(userdict['id'], profile_friends)
@@ -461,8 +486,9 @@ def send():
         with open(USERDATA_PATH + "/" + str(userdict['id'])+"/"+"user_interests.txt", 'w', encoding='utf-8') as fp:
             fp.write(str(user_interests))
 
-        return render_template('user.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
-                               user_interests=user_interests, profile_friends=profile_friends)
+        return redirect('/id/'+str(userdict['id']))
+        # return render_template('user.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data,
+        #                        user_interests=user_interests, profile_friends=profile_friends)
 
     # во избежание ошибки
     form = UseridForm()
