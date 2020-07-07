@@ -120,10 +120,10 @@ def social_to_human(vk_answer):
     if 'id' in vk_answer.keys():
         social_answer.append("Ссылка на профиль: vk.com/id{}".format(vk_answer['id']))
         pass
-    if 'first_name' in vk_answer.keys():
+    if 'first_name' in vk_answer.keys() and len(vk_answer['first_name'])>0:
         social_answer.append("Имя: {}".format(vk_answer['first_name']))
         pass
-    if 'last_name' in vk_answer:
+    if 'last_name' in vk_answer and len(vk_answer['last_name'])>0:
         social_answer.append("Фамилия: {}".format(vk_answer['last_name']))
         pass
     if 'is_closed' in vk_answer:
@@ -132,14 +132,14 @@ def social_to_human(vk_answer):
         if vk_answer['is_closed'] == 0:
             social_answer.append("Профиль открытый")
         pass
-    if 'bdate' in vk_answer:
+    if 'bdate' in vk_answer and len(vk_answer['bdate'])>0:
         social_answer.append("Дата рождения: {}".format(vk_answer['bdate']))
         pass
 
-    if 'about' in vk_answer:
+    if 'about' in vk_answer and len(vk_answer['about'])>0:
         social_answer.append("О себе: {}".format(vk_answer['about']))
         pass
-    if 'activities' in vk_answer:
+    if 'activities' in vk_answer and len(vk_answer['activities'])>0:
         social_answer.append("Деятельность: {}".format(vk_answer['activities']))
         pass
     if 'career' in vk_answer:
@@ -158,16 +158,16 @@ def social_to_human(vk_answer):
     if 'city' in vk_answer:
         social_answer.append("Город: {}".format(vk_answer['city']['title']))
 
-    if 'mobile_phone' in vk_answer:
+    if 'mobile_phone' in vk_answer and len(vk_answer['mobile_phone'])>0:
         social_answer.append("Мобильный телефон: {}".format(vk_answer['mobile_phone']))
 
-    if 'home_phone' in vk_answer:
+    if 'home_phone' in vk_answer and len(vk_answer['home_phone'])>0:
         social_answer.append("Домашний телефон: {}".format(vk_answer['home_phone']))
 
-    if 'skype' in vk_answer:
+    if 'skype' in vk_answer and len(vk_answer['skype'])>0:
         social_answer.append("Скайп: {}".format(vk_answer['skype']))
 
-    if 'interests' in vk_answer:
+    if 'interests' in vk_answer and len(vk_answer['interests'])>0:
         social_answer.append("Заинтересован в: {}".format(vk_answer['interests']))
 
     if 'last_seen' in vk_answer:

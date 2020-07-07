@@ -1,5 +1,6 @@
 import networkx as nx  # importing networkx package
 import matplotlib.pyplot as plt
+from networkx.algorithms.community import k_clique_communities
 from random import randrange
 from ast import literal_eval as le
 from networkx.readwrite import json_graph;
@@ -19,13 +20,16 @@ def clear_graph(G):
     G = nx.k_core(G, k=2)
     l2 = len(G)
     n2 = G.number_of_edges()
-    cliques = nx.find_cliques(G)
-    cliques3 = [clq for clq in cliques if len(clq) >= 3]
+    cliques3 = k_clique_communities(G, 3)
+    # cliques = nx.find_cliques(G)
+    # cliques3 = [clq for clq in cliques if len(clq) >= 3]
     nodes = set(n for clq in cliques3 for n in clq)
     h = G.subgraph(nodes)
-    deg = nx.degree(h)
-    nodes = [n for n in nodes if deg[n] >= 3]
-    k = h.subgraph(nodes)
+    # deg = nx.degree(h)
+    # nodes = [n for n in nodes if deg[n] >= 3]
+    # k = h.subgraph(nodes)
+    k = nx.k_core(h, k=3)
+    k = nx.k_core(k, k=2)
     l3 = len(k)
     n3 = k.number_of_edges()
     print("1 step Number of nodes " + str(l1) + " edges " + str(n1))
@@ -67,6 +71,8 @@ def savegraph2(lol, G, USERDATA_PATH, userid):
     for edge in oldgraph_edges:
         for nedge in newgraph_edges:
             if str(edge['from']) == str(nedge[0]) and str(edge['to']) == str(nedge[1]):
+                newedges_list.append(edge)
+            if str(edge['from']) == str(nedge[1]) and str(edge['to']) == str(nedge[0]):
                 newedges_list.append(edge)
             # print(edge)
             # print(nedge)

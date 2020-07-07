@@ -17,6 +17,10 @@ import os
 # create API to use
 # TODO - поменять scope
 # TODO - решить проблему количества запросов в секунду и парралельной работы пользователей
+
+# app auth
+# api = vk_requests.create_api(service_token=auth.APP_SECRET_TOKEN)
+# user auth
 api = vk_requests.create_api(app_id=auth.APP_ID, login=auth.APP_LOGIN, password=auth.APP_PASSWORD,
                              phone_number=auth.APP_LOGIN,
                              scope=['offline'])
@@ -53,8 +57,6 @@ def dictcleaner(keyname, lst):
             s.add(item[keyname])
             out.append(item)
     return out
-
-
 
 
 def get_friends(id):
@@ -327,9 +329,19 @@ def profile(username):
     except Exception as e:
         print("user_interests not generated")
         print(e)
+    # print(userdict)
+
+    nicedata = []
+    try:
+        nicedata = graphs.parsegraph(os.path.join(USERDATA_PATH,  str(userinfo[0]['id']), "nicedata.txt"))
+        # print(graph_data)
+        pass
+    except Exception as e:
+        print("nicedata not generated")
+        print(e)
 
 
-    return render_template('user.html', userdict=userdict, graph_data=graph_data, profile_friends=profile_friends, form=form, user_interests=user_interests)
+    return render_template('user.html', userdict=userdict, nicedata=nicedata, graph_data=graph_data, profile_friends=profile_friends, form=form, user_interests=user_interests)
 
 
 
@@ -400,7 +412,6 @@ def send(username):
         graph_data[1].append({"id": userdict['id'], "shape": "circularImage", "image": userdict['photo_max'],
                               "label": str(userdict['first_name']) + " " + str(userdict['last_name'])})
         # print(graph_data)
-
         # print("PROFILE FRIENDS")
         # print(profile_friends)
 
