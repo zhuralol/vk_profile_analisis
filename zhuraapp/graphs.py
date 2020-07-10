@@ -28,8 +28,7 @@ def clear_graph(G):
     # deg = nx.degree(h)
     # nodes = [n for n in nodes if deg[n] >= 3]
     # k = h.subgraph(nodes)
-    k = nx.k_core(h, k=3)
-    k = nx.k_core(k, k=2)
+    k = nx.k_core(h, k=2)
     l3 = len(k)
     n3 = k.number_of_edges()
     print("1 step Number of nodes " + str(l1) + " edges " + str(n1))
